@@ -5,7 +5,7 @@ app = express()
 
 
 app.get("/", function(req, res){
-    console.log("We got one!!")
+    //console.log("We got one!!")
     res.sendFile("./index.html", {root: __dirname})
 });
 
