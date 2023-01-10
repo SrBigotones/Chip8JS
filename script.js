@@ -22,4 +22,42 @@ const vFONTS = [
     0xF0, 0x80, 0xF0, 0x80, 0x80 ] // F
 
 
-console.log(vFONTS[0])
+function writeFonts(start){
+    //Write Fonts to memory
+    for (let i = 0; i < vFONTS.length; i++) {
+        vRAM[i+start] = vFONTS[i];
+    }
+}
+
+function fetch(){}
+function decode(opCODE){
+    switch (opCODE) {
+        case 0x00e0: // clear screen
+            break;
+        case (opCODE & 0xF000) == 0x1000: //1NNN Jump
+            break;
+        case (opCODE & 0xF000) == 0x6000://6XNN set register VX
+            break;
+        case (opCODE & 0xF000) == 0x7000://7XNN add value to register VX
+            break;
+        case (opCODE & 0xF000) == 0xA000://ANNN set index register I
+            break;
+        case (opCODE & 0xF000) == 0xD000://DXYN display/draw
+            break;
+        default:
+            break;
+    }
+}
+
+function drawPixel(x, y){
+    ctx.beginPath();
+    ctx.rect(x, y, 10, 10);
+    ctx.fillStyle = `white`;//`rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
+    ctx.fill();
+    ctx.closePath();    
+}
+
+
+writeFonts(0x90)
+
+console.log(vRAM[0])
