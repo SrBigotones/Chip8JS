@@ -1,4 +1,3 @@
-const fs = require('fs')
 
 var vRAM = new Array(4096)
 var vVX = new Array(16) //V0 to VF general registers
@@ -37,15 +36,17 @@ function writeFonts(start){
 
 function fetch(){
     let actualOP = 0
-    actualOP = (vRAM[startRAM+vPC] << 8) + (vRAM[startRAM+vPC+1]) //Big Endian
+    actualOP = (vRAM[startRAM + vPC] << 8) + (vRAM[startRAM + vPC+1]) //Big Endian
     vPC += 2
     return actualOP
 }
 
 function decode(opCODE){
     let nibble = [(opCODE & 0x0F00) >> 8,(opCODE & 0x00F0) >> 4,(opCODE & 0x000F)]
-    switch (opCODE) {
-        case 0x00e0: // clear screen
+    console.log(`opCODE: ${opCODE.toString(16)}`)
+	//console.log(`logic: ${(op)}`)
+	switch (true) {
+        case opCODE == 0x00e0: // clear screen
             ctx.clearRect(0,0, canvas.width, canvas.height)
             oX = new Array(64).fill(0)
             oY = new Array(32).fill(0)
@@ -69,8 +70,10 @@ function decode(opCODE){
             break;
 
         case (opCODE & 0xF000) == 0x7000://7XNN add value to register VX
-            vVX[nibble[0]] += (nibble[1] << 4) + nibble[2]
-            break;
+            console.log(vVX[nibble[0]])
+			vVX[nibble[0]] += (nibble[1] << 4) + nibble[2]  
+            console.log(vVX[nibble[0]])
+			break;
 
         case (opCODE & 0xF000) == 0xA000://ANNN set index register I
             vI = opCODE & 0xFFF
@@ -81,30 +84,32 @@ function decode(opCODE){
             let y = vVX[nibble[1]]
             let pixelLine = 0
             vVX[0xF] = 0 //VF
-            
+            console.log(`vI: ${vI}`) 
             for (let h = 0; h < nibble[2]; h++) {
-                pixelLine = vRAM[startRAM + vI + h]
-                for (let j = 0; j < 8; j++) {
-                    if((pixelLine & (1 << j)) != 0){
+                pixelLine = vRAM[vI + h]
+                //console.log(`pL: ${pixelLine.toString(2)}`)
+				for (let j = 0; j <= 8; j++) {
+                    //console.log(pixelLine & (1 << j))
+					if((pixelLine & (0x80 >> j)) != 0){
                         if(oX[x+j] == 1 & oY[y+h] == 1){
-                            drawPixel(x+j, y+h, 0)
+                            drawPixel(x+j, y+h, 1)
                             vVX[0xf] = 1
                         }else{
-                            drawPixel(x+j, y+h, 0)
+                            drawPixel(x+j, y+h, 1)
                         }
                     }
-                    if(x+j > 64){
+                    if(x+j > 63){
                         break
                     }
                 }
-                if(y+h > 32){
+                if(y+h > 31){
                     break
                 }
             }
             
             break;
-
-
+		case ((opCODE & 0xf000) == 0xd000):
+			console.log("shit for brains")
         default:
             break;
     }
@@ -129,7 +134,30 @@ function loadPG(){
     }
     });
 }
+
+
+
+function openfile() {
+	var input = document.getElementById("inputROM").files;
+	var fileData = new Blob([input[0]]);
+
+	var reader = new FileReader();
+	reader.readAsArrayBuffer(fileData);
+	reader.onload = function(){
+		var arrayBuffer = reader.result
+		var bytes = new Uint8Array(arrayBuffer);
+		console.log(bytes);
+		console.log(bytes.length)
+		for(var i = 0; i < bytes.length; i++){
+			console.log("caca")
+			vRAM[startRAM + i] = bytes[i]
+		}
+		startME()
+	}
+}
+
 function drawPixel(x, y, c){
+	//console.log(`draw ${x} ${y} ${c}`)
     ctx.beginPath();
     ctx.rect(x*10, y*10, 10, 10);
     if(c == 1){
@@ -147,15 +175,16 @@ function drawPixel(x, y, c){
 
 writeFonts(0x50)
 
-loadPG()
+//loadPG()
 
 
 function startME(){
-    while (true) {
-        decode(fetch())    
-    }
-}
+	for(var i=0; i < 50; i++){
+		decode(fetch())
+		console.log(`instruction: ${i}`)
+	}
 
+}
 
 
 

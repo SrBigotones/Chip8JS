@@ -11,11 +11,20 @@
 <body style="background-color: grey;">
     <!--64x32 original size of screen CHIP8, 1 pixel == 10x10 on screen-->
     <canvas id="myCavas" width="640" height="320" style="background-color: black;"></canvas>
+    <input type="file" id="inputROM"/>
     <script>
         const canvas = document.getElementById("myCavas")
         const ctx = canvas.getContext("2d");
 
+	const inputElement = document.getElementById("inputROM")
+	inputElement.files[0]
+
+	inputElement.addEventListener("change", (e) => {
+		const selectedFile = e.target.files[0]
+		openfile();
+		
+	})
         //drawPixel(0,0)
-        startME()
+        //startME()
     </script>
 </body>
