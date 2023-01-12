@@ -1,13 +1,16 @@
 
 var vRAM = new Array(4096)
-var vVX = new Array(16) //V0 to VF general registers
-var vPC = vI = vTIMER = vSOUND = 0
+var vVX = new Array(16).fill(0) //V0 to VF general registers
+var vI = vTIMER = vSOUND = 0
 var oX = new Array(64).fill(0)
 var oY = new Array(32).fill(0)
-
+const cpuWait = 8
+var runI = getOP = 0
 var vSTACK = new Array()
-
+var pgSize
+const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
+var vPC = startRAM
 const vFONTS = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -36,15 +39,31 @@ function writeFonts(start){
 
 function fetch(){
     let actualOP = 0
-    actualOP = (vRAM[startRAM + vPC] << 8) + (vRAM[startRAM + vPC+1]) //Big Endian
+    actualOP = (vRAM[vPC] << 8) + (vRAM[vPC+1]) //Big Endian
     vPC += 2
     return actualOP
 }
 
+
+function writeDivOP(opCODE){
+    
+    // Insert a row at the end of table
+    var newRow = opTable.insertRow();
+
+    // Insert a cell at the end of the row
+    var newCell = newRow.insertCell();
+
+    // Append a text node to the cell
+    var newText = document.createTextNode(`${opCODE.toString(16)}`);
+    newCell.appendChild(newText);
+}
+
 function decode(opCODE){
+
     let nibble = [(opCODE & 0x0F00) >> 8,(opCODE & 0x00F0) >> 4,(opCODE & 0x000F)]
     console.log(`opCODE: ${opCODE.toString(16)}`)
-	//console.log(`logic: ${(op)}`)
+	
+    //console.log(`logic: ${(op)}`)
 	switch (true) {
         case opCODE == 0x00e0: // clear screen
             ctx.clearRect(0,0, canvas.width, canvas.height)
@@ -116,43 +135,28 @@ function decode(opCODE){
 }
 
 
-function loadPG(){
-    //Load program to RAM
-    let h = 0
-    fs.open('./programs/ibmLogo.ch8', 'r', function(err, fd) {
-    if (err)
-        throw err;
-    var buffer = Buffer.alloc(1);
-    while (true)
-    {   
-        var num = fs.readSync(fd, buffer, 0, 1, null);
-        if (num === 0)
-        break;
-        vRAM[startRAM + h]
-        h += 1
-        //console.log('byte read', buffer[0].toString(16));
-    }
-    });
-}
-
-
 
 function openfile() {
 	var input = document.getElementById("inputROM").files;
 	var fileData = new Blob([input[0]]);
+    let aux = new Array(2)
 
 	var reader = new FileReader();
 	reader.readAsArrayBuffer(fileData);
 	reader.onload = function(){
 		var arrayBuffer = reader.result
 		var bytes = new Uint8Array(arrayBuffer);
-		console.log(bytes);
-		console.log(bytes.length)
-		for(var i = 0; i < bytes.length; i++){
-			console.log("caca")
+        pgSize = bytes.length
+		//console.log(bytes);
+		//console.log(bytes.length)
+		for(var i = 0; i < pgSize-2; i++){
+			//console.log("caca")
 			vRAM[startRAM + i] = bytes[i]
+            console.log(vRAM[startRAM+i].toString(16))
+            if(i % 2 == 1){
+                writeDivOP((bytes[i-1] << 8) + bytes[i])
+            }
 		}
-		startME()
 	}
 }
 
@@ -177,14 +181,78 @@ writeFonts(0x50)
 
 //loadPG()
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-function startME(){
-	for(var i=0; i < 50; i++){
-		decode(fetch())
-		console.log(`instruction: ${i}`)
-	}
+async function runOne(){
+    setTableInfo()
+    await sleep(cpuWait)
+    getOP = fetch()
+    //decode(getOP)
+    if(getOP){
+        console.log(opTable.rows[runI])
+        decode(getOP)
+    }else{
+        return
+    }
+    
+    console.log(`instruction: ${runI}`)
+    runI += 1
+}
+
+async function startME(){
+    console.log("################START##############")
+    console.log(vRAM[0x229])
+    console.log("################START##############")
+    while(runI < pgSize){
+        console.log(runI)
+        runOne()
+    }
+    // for(var i=0; i < pgSize; i++){
+    //     setTableInfo()
+    //     await sleep(cpuWait)
+    //     getOP = fetch()
+    //     //decode(getOP)
+    //     if(getOP){
+    //         console.log(opTable.rows[i])
+    //         decode(getOP)
+    //     }else{
+    //         break
+    //     }
+        
+	// 	console.log(`instruction: ${i}`)
+	// }
 
 }
+
+
+function setTableInfo(){
+    document.getElementById("tablePC").innerText =`PC: ${vPC.toString(16)}`
+    document.getElementById("tableI").innerText =`I: ${vI.toString(16)}`
+    document.getElementById("tableV0").innerText =`V0: ${vVX[0].toString(16)}`
+    document.getElementById("tableV1").innerText =`V0: ${vVX[1].toString(16)}`
+    document.getElementById("tableV2").innerText =`V0: ${vVX[2].toString(16)}`
+    document.getElementById("tableV3").innerText =`V0: ${vVX[3].toString(16)}`
+    document.getElementById("tableV4").innerText =`V0: ${vVX[4].toString(16)}`
+    document.getElementById("tableV5").innerText =`V0: ${vVX[5].toString(16)}`
+    document.getElementById("tableV6").innerText =`V0: ${vVX[6].toString(16)}`
+    document.getElementById("tableV7").innerText =`V0: ${vVX[7].toString(16)}`
+    document.getElementById("tableV8").innerText =`V0: ${vVX[8].toString(16)}`
+    document.getElementById("tableV9").innerText =`V0: ${vVX[9].toString(16)}`
+    document.getElementById("tableVA").innerText =`V0: ${vVX[10].toString(16)}`
+    document.getElementById("tableVB").innerText =`V0: ${vVX[11].toString(16)}`
+    document.getElementById("tableVC").innerText =`V0: ${vVX[12].toString(16)}`
+    document.getElementById("tableVD").innerText =`V0: ${vVX[13].toString(16)}`
+    document.getElementById("tableVE").innerText =`V0: ${vVX[14].toString(16)}`
+    document.getElementById("tableVF").innerText =`V0: ${vVX[15].toString(16)}`
+    
+}
+
+
+
+
+
 
 
 

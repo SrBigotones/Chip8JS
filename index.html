@@ -1,30 +1,111 @@
 <head>
-    <script src="/script.js"></script>
     <style>
         canvas {
             margin-left: auto;
             margin-right: auto;
             display: block;
         }
+        table {
+            display: inline-table;
+        }
     </style>
 </head>
 <body style="background-color: grey;">
     <!--64x32 original size of screen CHIP8, 1 pixel == 10x10 on screen-->
     <canvas id="myCavas" width="640" height="320" style="background-color: black;"></canvas>
-    <input type="file" id="inputROM"/>
+    <div>
+        <input type="file" id="inputROM"/>
+        <input type="button" id="btnRUN" value="RUN"/>
+        <input type="button" id="btnStep" value="Step IN" />
+        <table id="opTable" style="background-color: white;">
+            <tr>
+                <th>Instructions</th>
+            </tr>
+        </table>
+        <table id="regTable" style="background-color: blueviolet;">
+            <tr>
+                <th id="tablePC">PC:</th>
+                <th id="tableI">I:</th>
+            </tr>
+            <tr>
+                <th id="tableV0">V0:</th>
+            </tr>
+            <tr>
+                <th id="tableV1">V1:</th>
+            </tr>
+            <tr>
+                <th id="tableV2">V2:</th>
+            </tr>
+            <tr>
+                <th id="tableV3">V3:</th>
+            </tr>
+            <tr>
+                <th id="tableV4">V4:</th>
+            </tr>
+            <tr>
+                <th id="tableV5">V5:</th>
+            </tr>
+            <tr>
+                <th id="tableV6">V6:</th>
+            </tr>
+            <tr>
+                <th id="tableV7">V7:</th>
+            </tr>
+            <tr>
+                <th id="tableV8">V8:</th>
+            </tr>
+            <tr>
+                <th id="tableV9">V9:</th>
+            </tr>
+            <tr>
+                <th id="tableVA">VA:</th>
+            </tr>
+            <tr>
+                <th id="tableVB">VB:</th>
+            </tr>
+            <tr>
+                <th id="tableVC">VC:</th>
+            </tr>
+            <tr>
+                <th id="tableVD">VD:</th>
+            </tr>
+            <tr>
+                <th id="tableVE">VE:</th>
+            </tr>
+            <tr>
+                <th id="tableVF">VF:</th>
+            </tr>
+            </tr>
+        </table>
+    </div>
     <script>
         const canvas = document.getElementById("myCavas")
         const ctx = canvas.getContext("2d");
+        const inputElement = document.getElementById("inputROM")
+        const btnRUN = document.getElementById("btnRUN")
+        const btnStep = document.getElementById("btnStep")
+        inputElement.files[0]
 
-	const inputElement = document.getElementById("inputROM")
-	inputElement.files[0]
+        inputElement.addEventListener("change", (e) => {
+            const selectedFile = e.target.files[0]
+            openfile();
+        })
 
-	inputElement.addEventListener("change", (e) => {
-		const selectedFile = e.target.files[0]
-		openfile();
-		
-	})
-        //drawPixel(0,0)
-        //startME()
+        btnRUN.addEventListener("click", (e)=>{
+            if(!inputElement.files[0]){
+                alert("Program not loaded!")
+            }else
+            {
+                startME()
+            }
+        })
+        btnStep.addEventListener("click", (e) => {
+                if (!inputElement.files[0]) {
+                    alert("Program not loaded!")
+                } else {
+                    runOne()
+                }
+            })
     </script>
+    <script src="/script.js"></script>
 </body>
