@@ -107,7 +107,7 @@ function decode(opCODE){
             for (let h = 0; h < nibble[2]; h++) {
                 pixelLine = vRAM[vI + h]
                 //console.log(`pL: ${pixelLine.toString(2)}`)
-				for (let j = 0; j <= 8; j++) {
+				for (let j = 0; j < 8; j++) {
                     //console.log(pixelLine & (1 << j))
 					if((pixelLine & (0x80 >> j)) != 0){
                         if(oX[x+j] == 1 & oY[y+h] == 1){
@@ -127,16 +127,26 @@ function decode(opCODE){
             }
             
             break;
-		case ((opCODE & 0xf000) == 0xd000):
-			console.log("shit for brains")
         default:
             break;
     }
 }
 
 
-
 function openfile() {
+    opTable.innerHTML = `<tr>
+                            <th>Instructions</th>
+                        </tr>`
+    vRAM = new Array(4096)
+    VX = new Array(16).fill(0) //V0 to VF general registers
+    vI = vTIMER = vSOUND = 0
+    oX = new Array(64).fill(0)
+    oY = new Array(32).fill(0)
+    runI = getOP = 0
+    vSTACK = new Array()
+    pgSize = 0
+    vPC = startRAM
+
 	var input = document.getElementById("inputROM").files;
 	var fileData = new Blob([input[0]]);
     let aux = new Array(2)
@@ -149,10 +159,10 @@ function openfile() {
         pgSize = bytes.length
 		//console.log(bytes);
 		//console.log(bytes.length)
-		for(var i = 0; i < pgSize-2; i++){
+		for(var i = 0; i < pgSize; i++){
 			//console.log("caca")
 			vRAM[startRAM + i] = bytes[i]
-            console.log(vRAM[startRAM+i].toString(16))
+            //console.log(vRAM[startRAM+i].toString(16))
             if(i % 2 == 1){
                 writeDivOP((bytes[i-1] << 8) + bytes[i])
             }
@@ -186,43 +196,41 @@ function sleep(ms) {
 }
 
 async function runOne(){
+    //console.log(`I: ${runI}`)
     setTableInfo()
     await sleep(cpuWait)
     getOP = fetch()
-    //decode(getOP)
+    // decode(getOP)
     if(getOP){
-        console.log(opTable.rows[runI])
+        //console.log(opTable.rows[runI])
         decode(getOP)
     }else{
         return
     }
     
-    console.log(`instruction: ${runI}`)
+    //console.log(`instruction: ${runI}`)
     runI += 1
+
 }
 
 async function startME(){
     console.log("################START##############")
     console.log(vRAM[0x229])
     console.log("################START##############")
-    while(runI < pgSize){
-        console.log(runI)
-        runOne()
-    }
-    // for(var i=0; i < pgSize; i++){
-    //     setTableInfo()
-    //     await sleep(cpuWait)
-    //     getOP = fetch()
-    //     //decode(getOP)
-    //     if(getOP){
-    //         console.log(opTable.rows[i])
-    //         decode(getOP)
-    //     }else{
-    //         break
-    //     }
+    for(var i=0; i < pgSize; i++){
+        setTableInfo()
+        await sleep(cpuWait)
+        getOP = fetch()
+        //decode(getOP)
+        if(getOP){
+            //console.log(opTable.rows[i])
+            decode(getOP)
+        }else{
+            break
+        }
         
-	// 	console.log(`instruction: ${i}`)
-	// }
+		//console.log(`instruction: ${i}`)
+	}
 
 }
 
