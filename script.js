@@ -4,6 +4,8 @@ var vVX = new Array(16).fill(0) //V0 to VF general registers
 var vI = vTIMER = vSOUND = 0
 var oX = new Array(64).fill(0)
 var oY = new Array(32).fill(0)
+var pKey = 0xff //pressed key
+const altShift = 0 //alternative shift operator, 0 = original, VX = VY and then shift // 1 = 90', VX shifts
 const cpuWait = 8
 var runI = getOP = 0
 var vSTACK = new Array()
@@ -91,12 +93,121 @@ function decode(opCODE){
         case (opCODE & 0xF000) == 0x7000://7XNN add value to register VX
             console.log(vVX[nibble[0]])
 			vVX[nibble[0]] += (nibble[1] << 4) + nibble[2]  
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff //Caution of overflow
             console.log(vVX[nibble[0]])
 			break;
+
+        case (opCODE & 0xF00F) == 0x8000: //8XY0 SET
+            vVX[nibble[0]] = vVX[nibble[1]]
+            break
+        
+        case (opCODE & 0xF00F) == 0x8001: //8XY1 OR
+            vVX[nibble[0]] = vVX[nibble[0]] | vVX[nibble[1]]
+            break
+        
+        case (opCODE & 0xF00F) == 0x8002: //8XY2 AND
+            vVX[nibble[0]] = vVX[nibble[0]] & vVX[nibble[1]]
+            break
+        
+        case (opCODE & 0xF00F) == 0x8001: //8XY3 XOR
+            vVX[nibble[0]] = vVX[nibble[0]] ^ vVX[nibble[1]]
+            break
+        
+        case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
+            vVX[nibble[0]] = vVX[nibble[0]] + vVX[nibble[1]]
+            
+            if (vVX[0] > 0xff){ //Check if overflow
+                vVX[0] = vVX[0] & 0xFF
+                vVX[0xf] = 1
+            }else{
+                vVX[0xf] = 0
+            }
+
+            break
+
+        case (opCODE & 0xF00F) == 0x8005: // 8XY5 Substract
+            if(vVX[0] > vVX[1]){
+                vVX[0xf] = 1
+            }else{
+                vVX[0xf] = 0
+            }
+
+            vVX[nibble[0]] -= vVX[nibble[1]] 
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            break
+        case (opCODE & 0xF00F) == 0x8005: // 8XY7 Substract
+            if(vVX[1] > vVX[0]){
+                vVX[0xf] = 1
+            }else{
+                vVX[0xf] = 0
+            }
+
+            vVX[nibble[0]] = vVX[nibble[1]] - vVX[nibble[0]]
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            break
+
+        case (opCODE & 0xF00F) == 0x8006: //8XY6 SHIFT RIGHT
+            if(altShift == 0){
+                vVX[nibble[0]] = vVX[nibble[1]]
+            }
+            if((vVX[nibble[0]] & 0x01) == 1){
+                vVX[0xf] = 1
+            }else{vVX[0xf] = 0}
+            vVX[nibble[0]] = vVX[nibble[0]] >> 1
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            break
+        case (opCODE & 0xF00F) == 0x800E: //8XYE SHIFT LEFT
+            if(altShift == 0){
+                vVX[nibble[0]] = vVX[nibble[1]]
+            }
+            if((vVX[nibble[0]] & 0x80) == 1){
+                vVX[0xf] = 1
+            }else{vVX[0xf] = 0}
+            vVX[nibble[0]] = vVX[nibble[0]] << 1
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            break
 
         case (opCODE & 0xF000) == 0xA000://ANNN set index register I
             vI = opCODE & 0xFFF
             break;
+        
+        case (opCODE & 0xF000) == 0xB000://BNNN Jump with offset
+            vPC = ((opCODE & 0xfff) + vVX[0])
+            break;
+
+        case (opCODE & 0xF000) == 0xC000://CXNN Random
+            vVX[nibble[0]] = Math.floor(Math.random() * 0xff) & (opCODE & 0xff)
+            break;
+        // #################KEYS#################
+        case (opCODE & 0xF0FF) == 0xE09E: // EX9E Skip if key
+            break
+        case (opCODE & 0xF0FF) == 0xE0A1:// EXA1 Skip if key
+            break
+        
+        //############TIMERS###############
+        case (opCODE & 0xF0FF) == 0xF007:// FX07 Timer
+            break
+        case (opCODE & 0xF0FF) == 0xF015:// FX15 TIMER
+            break
+        case (opCODE & 0xF0FF) == 0xF018:// FX18 Timer
+            break
+
+        case (opCODE & 0xF0FF) == 0xF01E:// FX1E Add to index
+            break
+
+        case (opCODE & 0xF0FF) == 0xF00A:// FX0A Get key
+            break
+        
+        case (opCODE & 0xF0FF) == 0xF029:// FX29 Font Character
+            break
+        
+        case (opCODE & 0xF0FF) == 0xF033:// FX33 Binary-coded decimal conversion
+            break
+        
+        case (opCODE & 0xF0FF) == 0xF055:// FX55 Store Memory
+            break
+        case (opCODE & 0xF0FF) == 0xF065:// FX65 Load Memory
+            break
 
         case (opCODE & 0xF000) == 0xD000://DXYN display/draw
             let x = vVX[nibble[0]] 
