@@ -10,6 +10,7 @@ const cpuWait = 8
 var runI = getOP = 0
 var vSTACK = new Array()
 var pgSize
+var selKey = 0xff
 const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
 var vPC = startRAM
@@ -368,6 +369,74 @@ function setTableInfo(){
     
 }
 
+function setEvents(){
+    const kb0 = document.getElementById("kb0")
+    const kb1 = document.getElementById("kb1")
+    const kb2 = document.getElementById("kb2")
+    const kb3 = document.getElementById("kb3")
+    const kb4 = document.getElementById("kb4")
+    const kb5 = document.getElementById("kb5")
+    const kb6 = document.getElementById("kb6")
+    const kb7 = document.getElementById("kb7")
+    const kb8 = document.getElementById("kb8")
+    const kb9 = document.getElementById("kb9")
+    const kbA = document.getElementById("kbA")
+    const kbB = document.getElementById("kbB")
+    const kbC = document.getElementById("kbC")
+    const kbD= document.getElementById("kbD")
+    const kbE = document.getElementById("kbE")
+    const kbF = document.getElementById("kbF")
+
+    kb0.addEventListener("click", (e) => {
+        selKey = 0x10
+    })
+
+    kb1.addEventListener("click", (e) => {
+        selKey = 0x1
+    })
+    kb2.addEventListener("click", (e) => {
+        selKey = 0x2
+    })
+    kb3.addEventListener("click", (e) => {
+        selKey = 0x3
+    })
+    kb4.addEventListener("click", (e) => {
+        selKey = 0x4
+    })
+    kb5.addEventListener("click", (e) => {
+        selKey = 0x5
+    })
+    kb6.addEventListener("click", (e) => {
+        selKey = 0x6
+    })
+    kb7.addEventListener("click", (e) => {
+        selKey = 0x7
+    })
+    kb8.addEventListener("click", (e) => {
+        selKey = 0x8
+    })
+    kb9.addEventListener("click", (e) => {
+        selKey = 0x9
+    })
+    kbA.addEventListener("click", (e) => {
+        selKey = 0xA
+    })
+    kbB.addEventListener("click", (e) => {
+        selKey = 0xB
+    })
+    kbC.addEventListener("click", (e) => {
+        selKey = 0xC
+    })
+    kbD.addEventListener("click", (e) => {
+        selKey = 0xD
+    })
+    kbE.addEventListener("click", (e) => {
+        selKey = 0xE
+    })
+    kbF.addEventListener("click", (e) => {
+        selKey = 0xF
+    })
+}
 
 
 
