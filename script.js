@@ -11,6 +11,7 @@ var runI = getOP = 0
 var vSTACK = new Array()
 var pgSize
 var selKey = 0xff
+var keys = new Array(0xf).fill(false)
 const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
 var vPC = startRAM
@@ -86,6 +87,31 @@ function decode(opCODE){
         case opCODE == 0x00ee://00ee Return
             vPC = vSTACK.pop()
             break;
+
+        case (opCODE & 0xF000) == 0x3000://3XNN SKIP
+            if(vVX[nibble[0]] == (opCODE & 0xff)){
+                vPC += 2
+            }
+        break;
+        
+        case (opCODE & 0xF000) == 0x4000://4XNN SKIP
+            if(vVX[nibble[0]] != (opCODE & 0xff)){
+                vPC += 2
+            }
+        break;
+
+        case (opCODE & 0xF000) == 0x5000://5XY0 SKIP
+            if(vVX[nibble[0]] == vVX[nibble[1]]){
+                vPC += 2
+            }
+        break;
+
+        case (opCODE & 0xF000) == 0x9000://9XY0 SKIP
+            if(vVX[nibble[0]] != vVX[nibble[1]]){
+                vPC += 2
+            }
+        break;
+        
 
         case (opCODE & 0xF000) == 0x6000://6XNN set register VX
             vVX[nibble[0]] = (nibble[1] << 4) + nibble[2]
@@ -181,33 +207,73 @@ function decode(opCODE){
             break;
         // #################KEYS#################
         case (opCODE & 0xF0FF) == 0xE09E: // EX9E Skip if key
+            if(keys[nibble[0]] == true){
+                vPC += 2
+            }
             break
         case (opCODE & 0xF0FF) == 0xE0A1:// EXA1 Skip if key
+            if(keys[nibble[0]] == false){
+                vPC += 2
+            }
             break
         
         //############TIMERS###############
-        case (opCODE & 0xF0FF) == 0xF007:// FX07 Timer
+        case (opCODE & 0xF0FF) == 0xF007:// FX07 Set VX to the current value of the delay timer
+            vVX[nibble[0]] = vTIMER
             break
-        case (opCODE & 0xF0FF) == 0xF015:// FX15 TIMER
+        case (opCODE & 0xF0FF) == 0xF015:// FX15 Sets the delay timer to the value in VX
+            vTIMER = vVX[nibble[0]]
             break
-        case (opCODE & 0xF0FF) == 0xF018:// FX18 Timer
+        case (opCODE & 0xF0FF) == 0xF018:// FX18 sets the sound timer to the value in VX
+            vSOUND = vVX[nibble[0]]
             break
 
         case (opCODE & 0xF0FF) == 0xF01E:// FX1E Add to index
+            vI += vVX[nibble[0]]
+
+            if(vI > 0xfff){ //Overlflow
+                vI = vI & 0xfff
+                vVX[0xf] = 1
+            }
             break
 
         case (opCODE & 0xF0FF) == 0xF00A:// FX0A Get key
+            var aux = keys.includes(true)
+
+            if(aux){
+                for (let i = 0; i < keys.length; i++) {
+                    if(keys[i] == true){
+                        vVX[nibble[0]] = aux
+                        break
+                    }
+                }
+            }else{
+                vPC -= 2
+            }
             break
         
         case (opCODE & 0xF0FF) == 0xF029:// FX29 Font Character
+            //Fonts stored in 0x50, 5 bytes per character
+            vI = 0x50 + (5 * vVX[nibble[0]])
             break
         
         case (opCODE & 0xF0FF) == 0xF033:// FX33 Binary-coded decimal conversion
+            var foo = vVX[nibble[0]]
+
+            vRAM[vI] = ~~(foo/100)
+            vRAM[vI+1] = ~~((foo%100)/10)
+            vRAM[vI+2] = ~~(((foo%100)%10))
             break
         
         case (opCODE & 0xF0FF) == 0xF055:// FX55 Store Memory
+            for (let i = 0; i <= nibble[0]; i++) {
+                vRAM[vI + i] = vVX[i]
+            }
             break
         case (opCODE & 0xF0FF) == 0xF065:// FX65 Load Memory
+            for (let i = 0; i <= nibble[0]; i++) {
+                vVX[i] = vRAM[vI + i]
+            }
             break
 
         case (opCODE & 0xF000) == 0xD000://DXYN display/draw
@@ -309,7 +375,12 @@ function sleep(ms) {
 
 async function runOne(){
     //console.log(`I: ${runI}`)
-    setTableInfo()
+    try {
+        setTableInfo()
+        
+    } catch (error) {
+        
+    }
     await sleep(cpuWait)
     getOP = fetch()
     // decode(getOP)
@@ -325,12 +396,20 @@ async function runOne(){
 
 }
 
+
+
+
+
 async function startME(){
     console.log("################START##############")
     console.log(vRAM[0x229])
     console.log("################START##############")
-    for(var i=0; i < pgSize; i++){
-        setTableInfo()
+    while(vPC < pgSize + 512){
+        try {
+            setTableInfo()
+            
+        } catch (error) {
+        }
         await sleep(cpuWait)
         getOP = fetch()
         //decode(getOP)
@@ -340,9 +419,21 @@ async function startME(){
         }else{
             break
         }
+    }
+    // for(var i=0; i < pgSize; i++){
+    //     setTableInfo()
+    //     await sleep(cpuWait)
+    //     getOP = fetch()
+    //     //decode(getOP)
+    //     if(getOP){
+    //         //console.log(opTable.rows[i])
+    //         decode(getOP)
+    //     }else{
+    //         break
+    //     }
         
-		//console.log(`instruction: ${i}`)
-	}
+	// 	//console.log(`instruction: ${i}`)
+	// }
 
 }
 
@@ -387,55 +478,112 @@ function setEvents(){
     const kbE = document.getElementById("kbE")
     const kbF = document.getElementById("kbF")
 
+    
+
     kb0.addEventListener("click", (e) => {
-        selKey = 0x10
+        keys[0] = true
     })
 
     kb1.addEventListener("click", (e) => {
-        selKey = 0x1
+        keys[1] = true
     })
     kb2.addEventListener("click", (e) => {
-        selKey = 0x2
+        keys[2] = true
     })
     kb3.addEventListener("click", (e) => {
-        selKey = 0x3
+        keys[3] = true
     })
     kb4.addEventListener("click", (e) => {
-        selKey = 0x4
+        keys[4] = true
     })
     kb5.addEventListener("click", (e) => {
-        selKey = 0x5
+        keys[5] = true
     })
     kb6.addEventListener("click", (e) => {
-        selKey = 0x6
+        keys[6] = true
     })
     kb7.addEventListener("click", (e) => {
-        selKey = 0x7
+        keys[7] = true
     })
     kb8.addEventListener("click", (e) => {
-        selKey = 0x8
+        keys[8] = true
     })
     kb9.addEventListener("click", (e) => {
-        selKey = 0x9
+        keys[9] = true
     })
     kbA.addEventListener("click", (e) => {
-        selKey = 0xA
+        keys[0xa] = true
     })
     kbB.addEventListener("click", (e) => {
-        selKey = 0xB
+        keys[0xb] = true
     })
     kbC.addEventListener("click", (e) => {
-        selKey = 0xC
+        keys[0xc] = true
     })
     kbD.addEventListener("click", (e) => {
-        selKey = 0xD
+        keys[0xd] = true
     })
     kbE.addEventListener("click", (e) => {
-        selKey = 0xE
+        keys[0xe] = true
     })
     kbF.addEventListener("click", (e) => {
-        selKey = 0xF
+        keys[0xf] = true
     })
+
+
+
+    kb0.addEventListener("mouseup", (e) => {
+        keys[0] = false
+    })
+
+    kb1.addEventListener("mouseup", (e) => {
+        keys[1] = false
+    })
+    kb2.addEventListener("mouseup", (e) => {
+        keys[2] = false
+    })
+    kb3.addEventListener("mouseup", (e) => {
+        keys[3] = false
+    })
+    kb4.addEventListener("mouseup", (e) => {
+        keys[4] = false
+    })
+    kb5.addEventListener("mouseup", (e) => {
+        keys[5] = false
+    })
+    kb6.addEventListener("mouseup", (e) => {
+        keys[6] = false
+    })
+    kb7.addEventListener("mouseup", (e) => {
+        keys[7] = false
+    })
+    kb8.addEventListener("mouseup", (e) => {
+        keys[8] = false
+    })
+    kb9.addEventListener("mouseup", (e) => {
+        keys[9] = false
+    })
+    kbA.addEventListener("mouseup", (e) => {
+        keys[0xa] = false
+    })
+    kbB.addEventListener("mouseup", (e) => {
+        keys[0xb] = false
+    })
+    kbC.addEventListener("mouseup", (e) => {
+        keys[0xc] = false
+    })
+    kbD.addEventListener("mouseup", (e) => {
+        keys[0xd] = false
+    })
+    kbE.addEventListener("mouseup", (e) => {
+        keys[0xe] = false
+    })
+    kbF.addEventListener("mouseup", (e) => {
+        keys[0xf] = false
+    })
+
+
+    
 }
 
 
