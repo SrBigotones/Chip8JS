@@ -2,16 +2,15 @@
 var vRAM = new Array(4096)
 var vVX = new Array(16).fill(0) //V0 to VF general registers
 var vI = vTIMER = vSOUND = 0
-var oX = new Array(64).fill(0)
-var oY = new Array(32).fill(0)
-var pKey = 0xff //pressed key
+
+var pixels = new Array(2048).fill(0)
+var screenPixel = []
 const altShift = 0 //alternative shift operator, 0 = original, VX = VY and then shift // 1 = 90', VX shifts
-const cpuWait = 8
+const cpuWait = 1
 var runI = getOP = 0
 var vSTACK = new Array()
 var pgSize
-var selKey = 0xff
-var keys = new Array(0xf).fill(false)
+var keys = new Array(16).fill(false)
 const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
 var vPC = startRAM
@@ -71,8 +70,7 @@ function decode(opCODE){
 	switch (true) {
         case opCODE == 0x00e0: // clear screen
             ctx.clearRect(0,0, canvas.width, canvas.height)
-            oX = new Array(64).fill(0)
-            oY = new Array(32).fill(0)
+            cleanPixels()
             break;
 
         case (opCODE & 0xF000) == 0x1000: //1NNN Jump
@@ -106,22 +104,16 @@ function decode(opCODE){
             }
         break;
 
-        case (opCODE & 0xF000) == 0x9000://9XY0 SKIP
-            if(vVX[nibble[0]] != vVX[nibble[1]]){
-                vPC += 2
-            }
-        break;
-        
-
         case (opCODE & 0xF000) == 0x6000://6XNN set register VX
             vVX[nibble[0]] = (nibble[1] << 4) + nibble[2]
             break;
 
+        
         case (opCODE & 0xF000) == 0x7000://7XNN add value to register VX
-            console.log(vVX[nibble[0]])
+            //console.log(vVX[nibble[0]])
 			vVX[nibble[0]] += (nibble[1] << 4) + nibble[2]  
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff //Caution of overflow
-            console.log(vVX[nibble[0]])
+            //console.log(vVX[nibble[0]])
 			break;
 
         case (opCODE & 0xF00F) == 0x8000: //8XY0 SET
@@ -136,15 +128,15 @@ function decode(opCODE){
             vVX[nibble[0]] = vVX[nibble[0]] & vVX[nibble[1]]
             break
         
-        case (opCODE & 0xF00F) == 0x8001: //8XY3 XOR
+        case (opCODE & 0xF00F) == 0x8003: //8XY3 XOR
             vVX[nibble[0]] = vVX[nibble[0]] ^ vVX[nibble[1]]
             break
         
         case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
             vVX[nibble[0]] = vVX[nibble[0]] + vVX[nibble[1]]
             
-            if (vVX[0] > 0xff){ //Check if overflow
-                vVX[0] = vVX[0] & 0xFF
+            if (vVX[nibble[0]] > 0xff){ //Check if overflow
+                vVX[nibble[0]] = vVX[nibble[0]] & 0xFF
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
@@ -153,7 +145,7 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF00F) == 0x8005: // 8XY5 Substract
-            if(vVX[0] > vVX[1]){
+            if(vVX[nibble[0]] > vVX[nibble[1]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
@@ -162,8 +154,9 @@ function decode(opCODE){
             vVX[nibble[0]] -= vVX[nibble[1]] 
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff
             break
+
         case (opCODE & 0xF00F) == 0x8005: // 8XY7 Substract
-            if(vVX[1] > vVX[0]){
+            if(vVX[nibble[1]] > vVX[nibble[0]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
@@ -193,6 +186,12 @@ function decode(opCODE){
             vVX[nibble[0]] = vVX[nibble[0]] << 1
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff
             break
+        
+        case (opCODE & 0xF000) == 0x9000://9XY0 SKIP
+            if (vVX[nibble[0]] != vVX[nibble[1]]) {
+                vPC += 2
+            }
+            break;
 
         case (opCODE & 0xF000) == 0xA000://ANNN set index register I
             vI = opCODE & 0xFFF
@@ -212,9 +211,12 @@ function decode(opCODE){
             }
             break
         case (opCODE & 0xF0FF) == 0xE0A1:// EXA1 Skip if key
+            // stopNOW = true
             if(keys[nibble[0]] == false){
                 vPC += 2
             }
+
+            // console.log(keys)
             break
         
         //############TIMERS###############
@@ -238,15 +240,10 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF0FF) == 0xF00A:// FX0A Get key
-            var aux = keys.includes(true)
+            var aux = keys.indexOf(true)
 
-            if(aux){
-                for (let i = 0; i < keys.length; i++) {
-                    if(keys[i] == true){
-                        vVX[nibble[0]] = aux
-                        break
-                    }
-                }
+            if(aux != -1){
+                vVX[nibble[0]] = aux
             }else{
                 vPC -= 2
             }
@@ -277,22 +274,25 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF000) == 0xD000://DXYN display/draw
-            let x = vVX[nibble[0]] 
+            // stopNOW = true
+            let x = vVX[nibble[0]]
             let y = vVX[nibble[1]]
             let pixelLine = 0
-            vVX[0xF] = 0 //VF
-            console.log(`vI: ${vI}`) 
+            vVX[0xF] = 0 //VF 
+
             for (let h = 0; h < nibble[2]; h++) {
                 pixelLine = vRAM[vI + h]
-                //console.log(`pL: ${pixelLine.toString(2)}`)
-				for (let j = 0; j < 8; j++) {
-                    //console.log(pixelLine & (1 << j))
-					if((pixelLine & (0x80 >> j)) != 0){
-                        if(oX[x+j] == 1 & oY[y+h] == 1){
-                            drawPixel(x+j, y+h, 1)
+				
+                for (let j = 0; j < 8; j++) {
+                    if ((pixelLine & (0x80 >> j)) != 0){
+                        if(screenPixel[x+j][y+h] == 1){
+                        // if(oX[x+j] == 1 & oY[y+h] == 1){
+                            drawPixel(x+j, y+h, 0)
+                            screenPixel[x + j][y + h] = 0
                             vVX[0xf] = 1
                         }else{
                             drawPixel(x+j, y+h, 1)
+                            screenPixel[x+j][y+h] = 1
                         }
                     }
                     if(x+j > 63){
@@ -306,6 +306,8 @@ function decode(opCODE){
             
             break;
         default:
+            console.log("OPCODE UNKOWN")
+            stopNOW = true
             break;
     }
 }
@@ -324,6 +326,8 @@ function openfile() {
     vSTACK = new Array()
     pgSize = 0
     vPC = startRAM
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    cleanPixels()
 
 	var input = document.getElementById("inputROM").files;
 	var fileData = new Blob([input[0]]);
@@ -348,18 +352,22 @@ function openfile() {
 	}
 }
 
-function drawPixel(x, y, c){
-	//console.log(`draw ${x} ${y} ${c}`)
+function drawPixel(xd, yd, c){
+	console.log(`draw ${xd} ${yd} ${screenPixel[xd][yd]}`)
     ctx.beginPath();
-    ctx.rect(x*10, y*10, 10, 10);
+    ctx.rect(xd*10, yd*10, 10, 10);
     if(c == 1){
         //draw
         ctx.fillStyle = `white`;//`rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
-        oX[x] = oY[y] = 1
+        // screenPixel[x][y] = 1
+        // oX[x] = 1
+        // oY[y] = 1
     }else{
         //clean per se
         ctx.fillStyle = `black`;//`rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
-        oX[x] = oY[y] = 0
+        // screenPixel[x][y] = 0
+        // oX[x] = 0 
+        // oY[y] = 0
     }
     ctx.fill();
     ctx.closePath();    
@@ -404,7 +412,7 @@ async function startME(){
     console.log("################START##############")
     console.log(vRAM[0x229])
     console.log("################START##############")
-    while(vPC < pgSize + 512){
+    while((vPC < pgSize + 512) & (stopNOW == false)){
         try {
             setTableInfo()
             
@@ -420,22 +428,22 @@ async function startME(){
             break
         }
     }
-    // for(var i=0; i < pgSize; i++){
-    //     setTableInfo()
-    //     await sleep(cpuWait)
-    //     getOP = fetch()
-    //     //decode(getOP)
-    //     if(getOP){
-    //         //console.log(opTable.rows[i])
-    //         decode(getOP)
-    //     }else{
-    //         break
-    //     }
-        
-	// 	//console.log(`instruction: ${i}`)
-	// }
 
 }
+
+
+function cleanPixels(){
+    screenPixel = []
+    for (let i = 0; i < 64; i++) {
+        let aux = []
+        for (let h = 0; h < 32; h++) {
+            aux.push(0)
+        }
+        screenPixel.push(aux)
+
+    }
+}
+
 
 
 function setTableInfo(){
@@ -480,106 +488,138 @@ function setEvents(){
 
     
 
-    kb0.addEventListener("click", (e) => {
+    kb0.addEventListener("mousedown", (e) => {
         keys[0] = true
+        console.log("PRESS 0")
     })
 
-    kb1.addEventListener("click", (e) => {
+    kb1.addEventListener("mousedown", (e) => {
         keys[1] = true
+        console.log("PRESS 1")
     })
-    kb2.addEventListener("click", (e) => {
+    kb2.addEventListener("mousedown", (e) => {
         keys[2] = true
+        console.log("PRESS 2")
     })
-    kb3.addEventListener("click", (e) => {
+    kb3.addEventListener("mousedown", (e) => {
         keys[3] = true
+        console.log("PRESS 3")
     })
-    kb4.addEventListener("click", (e) => {
+    kb4.addEventListener("mousedown", (e) => {
         keys[4] = true
+        console.log("PRESS 4")
     })
-    kb5.addEventListener("click", (e) => {
+    kb5.addEventListener("mousedown", (e) => {
         keys[5] = true
+        console.log("PRESS 5")
     })
-    kb6.addEventListener("click", (e) => {
+    kb6.addEventListener("mousedown", (e) => {
         keys[6] = true
+        console.log("PRESS 6")
     })
-    kb7.addEventListener("click", (e) => {
+    kb7.addEventListener("mousedown", (e) => {
         keys[7] = true
+        console.log("PRESS 7")
     })
-    kb8.addEventListener("click", (e) => {
+    kb8.addEventListener("mousedown", (e) => {
         keys[8] = true
+        console.log("PRESS 8")
     })
-    kb9.addEventListener("click", (e) => {
+    kb9.addEventListener("mousedown", (e) => {
         keys[9] = true
+        console.log("PRESS 9")
     })
-    kbA.addEventListener("click", (e) => {
+    kbA.addEventListener("mousedown", (e) => {
         keys[0xa] = true
+        console.log("PRESS A")
     })
-    kbB.addEventListener("click", (e) => {
+    kbB.addEventListener("mousedown", (e) => {
         keys[0xb] = true
+        console.log("PRESS B")
     })
-    kbC.addEventListener("click", (e) => {
+    kbC.addEventListener("mousedown", (e) => {
         keys[0xc] = true
+        console.log("PRESS C")
     })
-    kbD.addEventListener("click", (e) => {
+    kbD.addEventListener("mousedown", (e) => {
         keys[0xd] = true
+        console.log("PRESS D")
     })
-    kbE.addEventListener("click", (e) => {
+    kbE.addEventListener("mousedown", (e) => {
         keys[0xe] = true
+        console.log("PRESS E")
     })
-    kbF.addEventListener("click", (e) => {
+    kbF.addEventListener("mousedown", (e) => {
         keys[0xf] = true
+        console.log("PRESS F")
     })
 
 
 
     kb0.addEventListener("mouseup", (e) => {
         keys[0] = false
+        console.log("RELEASE 0")
     })
 
     kb1.addEventListener("mouseup", (e) => {
         keys[1] = false
+        console.log("RELEASE 1")
     })
     kb2.addEventListener("mouseup", (e) => {
         keys[2] = false
+        console.log("RELEASE 2")
     })
     kb3.addEventListener("mouseup", (e) => {
         keys[3] = false
+        console.log("RELEASE 3")
     })
     kb4.addEventListener("mouseup", (e) => {
         keys[4] = false
+        console.log("RELEASE 4")
     })
     kb5.addEventListener("mouseup", (e) => {
         keys[5] = false
+        console.log("RELEASE 5")
     })
     kb6.addEventListener("mouseup", (e) => {
         keys[6] = false
+        console.log("RELEASE 6")
     })
     kb7.addEventListener("mouseup", (e) => {
         keys[7] = false
+        console.log("RELEASE 7")
     })
     kb8.addEventListener("mouseup", (e) => {
         keys[8] = false
+        console.log("RELEASE 8")
     })
     kb9.addEventListener("mouseup", (e) => {
         keys[9] = false
+        console.log("RELEASE 9")
     })
     kbA.addEventListener("mouseup", (e) => {
         keys[0xa] = false
+        console.log("RELEASE A")
     })
     kbB.addEventListener("mouseup", (e) => {
         keys[0xb] = false
+        console.log("RELEASE B")
     })
     kbC.addEventListener("mouseup", (e) => {
         keys[0xc] = false
+        console.log("RELEASE C")
     })
     kbD.addEventListener("mouseup", (e) => {
         keys[0xd] = false
+        console.log("RELEASE D")
     })
     kbE.addEventListener("mouseup", (e) => {
         keys[0xe] = false
+        console.log("RELEASE E")
     })
     kbF.addEventListener("mouseup", (e) => {
         keys[0xf] = false
+        console.log("RELEASE F")
     })
 
 

@@ -17,6 +17,7 @@
         <input type="file" id="inputROM"/>
         <input type="button" id="btnRUN" value="RUN"/>
         <input type="button" id="btnStep" value="Step IN" />
+        <input type="button" id="btnStop" value="STOP" />
         <table id="opTable" style="background-color: white;">
             <tr>
                 <th>Instructions</th>
@@ -108,11 +109,13 @@
     </div>
 
     <script>
+        var stopNOW = false
         const canvas = document.getElementById("myCavas")
         const ctx = canvas.getContext("2d");
         const inputElement = document.getElementById("inputROM")
         const btnRUN = document.getElementById("btnRUN")
         const btnStep = document.getElementById("btnStep")
+        const btnStop = document.getElementById("btnStop")
         
         inputElement.files[0]
 
@@ -126,6 +129,7 @@
                 alert("Program not loaded!")
             }else
             {
+                stopNOW = false
                 startME()
             }
         })
@@ -135,6 +139,10 @@
                 } else {
                     runOne()
                 }
+            })
+
+        btnStop.addEventListener("click", (e) => {
+                stopNOW = true
             })
 
     </script>
