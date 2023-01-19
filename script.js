@@ -63,6 +63,13 @@ function writeDivOP(opCODE){
 
 function decode(opCODE){
 
+    if(vTIMER != 0){
+        vTIMER--
+    }
+    if(vSOUND != 0){
+        vSOUND--
+    }
+
     let nibble = [(opCODE & 0x0F00) >> 8,(opCODE & 0x00F0) >> 4,(opCODE & 0x000F)]
     console.log(`opCODE: ${opCODE.toString(16)}`)
 	
@@ -71,6 +78,10 @@ function decode(opCODE){
         case opCODE == 0x00e0: // clear screen
             ctx.clearRect(0,0, canvas.width, canvas.height)
             cleanPixels()
+            break;
+
+        case opCODE == 0x00ee://00ee Return
+            vPC = vSTACK.pop()
             break;
 
         case (opCODE & 0xF000) == 0x1000: //1NNN Jump
@@ -82,9 +93,6 @@ function decode(opCODE){
             vPC = opCODE & 0x0fff
             break;
 
-        case opCODE == 0x00ee://00ee Return
-            vPC = vSTACK.pop()
-            break;
 
         case (opCODE & 0xF000) == 0x3000://3XNN SKIP
             if(vVX[nibble[0]] == (opCODE & 0xff)){
@@ -105,13 +113,13 @@ function decode(opCODE){
         break;
 
         case (opCODE & 0xF000) == 0x6000://6XNN set register VX
-            vVX[nibble[0]] = (nibble[1] << 4) + nibble[2]
+            vVX[nibble[0]] = (opCODE & 0xff)//(nibble[1] << 4) + nibble[2]
             break;
 
         
         case (opCODE & 0xF000) == 0x7000://7XNN add value to register VX
             //console.log(vVX[nibble[0]])
-			vVX[nibble[0]] += (nibble[1] << 4) + nibble[2]  
+			vVX[nibble[0]] += (opCODE & 0xff)//((nibble[1] << 4) + nibble[2])
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff //Caution of overflow
             //console.log(vVX[nibble[0]])
 			break;
@@ -130,6 +138,7 @@ function decode(opCODE){
         
         case (opCODE & 0xF00F) == 0x8003: //8XY3 XOR
             vVX[nibble[0]] = vVX[nibble[0]] ^ vVX[nibble[1]]
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff //caution overflow
             break
         
         case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
@@ -155,7 +164,7 @@ function decode(opCODE){
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff
             break
 
-        case (opCODE & 0xF00F) == 0x8005: // 8XY7 Substract
+        case (opCODE & 0xF00F) == 0x8007: // 8XY7 Substract
             if(vVX[nibble[1]] > vVX[nibble[0]]){
                 vVX[0xf] = 1
             }else{
@@ -167,6 +176,7 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF00F) == 0x8006: //8XY6 SHIFT RIGHT
+            
             if(altShift == 0){
                 vVX[nibble[0]] = vVX[nibble[1]]
             }
@@ -199,6 +209,7 @@ function decode(opCODE){
         
         case (opCODE & 0xF000) == 0xB000://BNNN Jump with offset
             vPC = ((opCODE & 0xfff) + vVX[0])
+            vPC = vPC & 0xfff
             break;
 
         case (opCODE & 0xF000) == 0xC000://CXNN Random
@@ -206,13 +217,14 @@ function decode(opCODE){
             break;
         // #################KEYS#################
         case (opCODE & 0xF0FF) == 0xE09E: // EX9E Skip if key
-            if(keys[nibble[0]] == true){
+            if(keys[vVX[nibble[0]]] == true){
                 vPC += 2
             }
             break
         case (opCODE & 0xF0FF) == 0xE0A1:// EXA1 Skip if key
             // stopNOW = true
-            if(keys[nibble[0]] == false){
+            //console.log(`ASK KEY: `)
+            if (keys[vVX[nibble[0]]] == false){
                 vPC += 2
             }
 
