@@ -154,47 +154,62 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF00F) == 0x8005: // 8XY5 Substract
+            // vVX[0xf] = 0
+            
+            vVX[nibble[0]] = vVX[nibble[0]] - vVX[nibble[1]] 
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+
             if(vVX[nibble[0]] > vVX[nibble[1]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
-
-            vVX[nibble[0]] -= vVX[nibble[1]] 
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
             break
 
         case (opCODE & 0xF00F) == 0x8007: // 8XY7 Substract
+            // vVX[0xf] = 0
+            vVX[nibble[0]] = vVX[nibble[1]] - vVX[nibble[0]]
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            
             if(vVX[nibble[1]] > vVX[nibble[0]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
-
-            vVX[nibble[0]] = vVX[nibble[1]] - vVX[nibble[0]]
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
             break
 
         case (opCODE & 0xF00F) == 0x8006: //8XY6 SHIFT RIGHT
-            
+            // vVX[0xf] = 0
             if(altShift == 0){
                 vVX[nibble[0]] = vVX[nibble[1]]
             }
-            if((vVX[nibble[0]] & 0x01) == 1){
-                vVX[0xf] = 1
-            }else{vVX[0xf] = 0}
+            var aux = vVX[nibble[0]] & 0x01
+            
             vVX[nibble[0]] = vVX[nibble[0]] >> 1
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            
+            if(aux == 1){
+                vVX[0xf] = 1
+            }else{
+                vVX[0xf] = 0
+            }
             break
         case (opCODE & 0xF00F) == 0x800E: //8XYE SHIFT LEFT
+            // vVX[0xf] = 0
+        
             if(altShift == 0){
                 vVX[nibble[0]] = vVX[nibble[1]]
             }
-            if((vVX[nibble[0]] & 0x80) == 1){
-                vVX[0xf] = 1
-            }else{vVX[0xf] = 0}
+            var aux = vVX[nibble[0]] & 0x80
+
             vVX[nibble[0]] = vVX[nibble[0]] << 1
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+
+            if(aux == 0x80){
+                vVX[0xf] = 1
+            }else{
+                vVX[0xf] = 0
+            }
             break
         
         case (opCODE & 0xF000) == 0x9000://9XY0 SKIP
