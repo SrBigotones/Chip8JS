@@ -2,6 +2,7 @@
 var vRAM = new Array(4096)
 var vVX = new Array(16).fill(0) //V0 to VF general registers
 var vI = vTIMER = vSOUND = 0
+var bfrCell = ["tblRAM0","tblRAM0"] //the last cells that were edited
 
 var pixels = new Array(2048).fill(0)
 var screenPixel = []
@@ -42,7 +43,13 @@ function writeFonts(start){
 
 function fetch(){
     let actualOP = 0
+    document.getElementById(bfrCell[0]).style = "background-color:white;"
+    document.getElementById(bfrCell[1]).style = "background-color:white;"
     actualOP = (vRAM[vPC] << 8) + (vRAM[vPC+1]) //Big Endian
+    bfrCell[0] = `tblRAM${vPC - 512}`
+    bfrCell[1] = `tblRAM${vPC - 511}`
+    document.getElementById(bfrCell[0]).style = "background-color:green;"
+    document.getElementById(bfrCell[1]).style = "background-color:green;"
     vPC += 2
     return actualOP
 }
@@ -262,7 +269,7 @@ function decode(opCODE){
 
             if(vI > 0xfff){ //Overlflow
                 vI = vI & 0xfff
-                vVX[0xf] = 1
+                // vVX[0xf] = 1
             }
             break
 
@@ -287,11 +294,21 @@ function decode(opCODE){
             vRAM[vI] = ~~(foo/100)
             vRAM[vI+1] = ~~((foo%100)/10)
             vRAM[vI+2] = ~~(((foo%100)%10))
+
+
+            //need to update those cells
+            document.getElementById(`tblRAM${vI - 512}`).innerHTML = ("0" + vRAM[vI].toString(16).toUpperCase())
+            document.getElementById(`tblRAM${vI - 511}`).innerHTML = ("0" + vRAM[vI+1].toString(16).toUpperCase())
+            document.getElementById(`tblRAM${vI - 510}`).innerHTML = ("0" + vRAM[vI+2].toString(16).toUpperCase())
             break
         
         case (opCODE & 0xF0FF) == 0xF055:// FX55 Store Memory
+            var auxi 
             for (let i = 0; i <= nibble[0]; i++) {
                 vRAM[vI + i] = vVX[i]
+                auxi = vVX[i].toString(16)
+                if (auxi <= 0xf) { auxi = "0" + auxi }
+                document.getElementById(`tblRAM${vI+i - 512}`).innerHTML = auxi.toUpperCase()
             }
             break
         case (opCODE & 0xF0FF) == 0xF065:// FX65 Load Memory
@@ -341,9 +358,6 @@ function decode(opCODE){
 
 
 function openfile() {
-    opTable.innerHTML = `<tr>
-                            <th>Instructions</th>
-                        </tr>`
     vRAM = new Array(4096)
     VX = new Array(16).fill(0) //V0 to VF general registers
     vI = vTIMER = vSOUND = 0
@@ -366,15 +380,20 @@ function openfile() {
 		var arrayBuffer = reader.result
 		var bytes = new Uint8Array(arrayBuffer);
         pgSize = bytes.length
+        writeRAMtbl(pgSize)
 		//console.log(bytes);
 		//console.log(bytes.length)
 		for(var i = 0; i < pgSize; i++){
 			//console.log("caca")
 			vRAM[startRAM + i] = bytes[i]
+
+            let aux = bytes[i].toString(16)
+            if(aux.length == 1){aux = `0`+aux}
+            document.getElementById(`tblRAM${i}`).innerHTML = aux.toUpperCase()
             //console.log(vRAM[startRAM+i].toString(16))
-            if(i % 2 == 1){
-                writeDivOP((bytes[i-1] << 8) + bytes[i])
-            }
+            // if(i % 2 == 1){
+            //     writeDivOP((bytes[i-1] << 8) + bytes[i])
+            // }
 		}
 	}
 }
@@ -471,6 +490,23 @@ function cleanPixels(){
     }
 }
 
+
+function writeRAMtbl(progLen){
+    //Write the ram table for debuggin purposes
+    let htmlCode = ``
+    let cont = 0
+    let i = 0
+    while(i < progLen) {
+        htmlCode += `<tr>`
+        for (let h = 0; h < 20; h++) {
+            htmlCode += `<th id="tblRAM${i}">00</th>`
+            i++
+            if(i>progLen){break}
+        }
+        htmlCode += `</tr>`
+    }
+    opTable.innerHTML = htmlCode
+}
 
 
 function setTableInfo(){
