@@ -86,12 +86,12 @@ function decode(opCODE){
             break;
 
         case (opCODE & 0xF000) == 0x1000: //1NNN Jump
-            vPC = opCODE & 0x0fff
+            vPC = (opCODE & 0xfff)
             break;
 
         case (opCODE & 0xF000) == 0x2000://2NNN Jump set stack
             vSTACK.push(vPC)
-            vPC = opCODE & 0x0fff
+            vPC = (opCODE & 0xfff)
             break;
 
 
@@ -130,26 +130,28 @@ function decode(opCODE){
             break
         
         case (opCODE & 0xF00F) == 0x8001: //8XY1 OR
+            vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] | vVX[nibble[1]]
             break
         
         case (opCODE & 0xF00F) == 0x8002: //8XY2 AND
+            vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] & vVX[nibble[1]]
             break
         
         case (opCODE & 0xF00F) == 0x8003: //8XY3 XOR
+            vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] ^ vVX[nibble[1]]
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff //caution overflow
             break
         
         case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
+            vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] + vVX[nibble[1]]
             
             if (vVX[nibble[0]] > 0xff){ //Check if overflow
                 vVX[nibble[0]] = vVX[nibble[0]] & 0xFF
                 vVX[0xf] = 1
-            }else{
-                vVX[0xf] = 0
             }
 
             break
@@ -225,7 +227,7 @@ function decode(opCODE){
         
         case (opCODE & 0xF000) == 0xB000://BNNN Jump with offset
             vPC = ((opCODE & 0xfff) + vVX[0])
-            vPC = vPC & 0xfff
+            // vPC = vPC & 0xfff
             break;
 
         case (opCODE & 0xF000) == 0xC000://CXNN Random
@@ -260,11 +262,6 @@ function decode(opCODE){
 
         case (opCODE & 0xF0FF) == 0xF01E:// FX1E Add to index
             vI += vVX[nibble[0]]
-
-            if(vI > 0xfff){ //Overlflow
-                vI = vI & 0xfff
-                // vVX[0xf] = 1
-            }
             break
 
         case (opCODE & 0xF0FF) == 0xF00A:// FX0A Get key
@@ -279,21 +276,21 @@ function decode(opCODE){
         
         case (opCODE & 0xF0FF) == 0xF029:// FX29 Font Character
             //Fonts stored in 0x50, 5 bytes per character
-            vI = 0x50 + (5 * vVX[nibble[0]])
+            vI = (5 * vVX[nibble[0]])
             break
         
         case (opCODE & 0xF0FF) == 0xF033:// FX33 Binary-coded decimal conversion
             var foo = vVX[nibble[0]]
-
-            vRAM[vI] = ~~(foo/100)
-            vRAM[vI+1] = ~~((foo%100)/10)
-            vRAM[vI+2] = ~~(((foo%100)%10))
-
-
+            // stopNOW = true
+            vRAM[vI] = parseInt(foo/100)
+            vRAM[vI+1] = parseInt((foo%100)/10)
+            vRAM[vI+2] = parseInt((foo%10))
             //need to update those cells
             document.getElementById(`tblRAM${vI - 512}`).innerHTML = ("0" + vRAM[vI].toString(16).toUpperCase())
             document.getElementById(`tblRAM${vI - 511}`).innerHTML = ("0" + vRAM[vI+1].toString(16).toUpperCase())
             document.getElementById(`tblRAM${vI - 510}`).innerHTML = ("0" + vRAM[vI+2].toString(16).toUpperCase())
+            
+            vI += 2
             break
         
         case (opCODE & 0xF0FF) == 0xF055:// FX55 Store Memory
@@ -304,6 +301,7 @@ function decode(opCODE){
                 if (auxi <= 0xf) { auxi = "0" + auxi }
                 document.getElementById(`tblRAM${vI+i - 512}`).innerHTML = auxi.toUpperCase()
             }
+            vI += 2
             break
         case (opCODE & 0xF0FF) == 0xF065:// FX65 Load Memory
             for (let i = 0; i <= nibble[0]; i++) {
@@ -313,8 +311,8 @@ function decode(opCODE){
 
         case (opCODE & 0xF000) == 0xD000://DXYN display/draw
             // stopNOW = true
-            let x = vVX[nibble[0]]
-            let y = vVX[nibble[1]]
+            let x = vVX[nibble[0]] //% 63
+            let y = vVX[nibble[1]] //% 31
             let pixelLine = 0
             vVX[0xF] = 0 //VF 
 
@@ -322,6 +320,8 @@ function decode(opCODE){
                 pixelLine = vRAM[vI + h]
 				
                 for (let j = 0; j < 8; j++) {
+                    if((x+j > 63) | (y+h > 31)){break}
+                    
                     if ((pixelLine & (0x80 >> j)) != 0){
                         if(screenPixel[x+j][y+h] == 1){
                         // if(oX[x+j] == 1 & oY[y+h] == 1){
@@ -333,12 +333,6 @@ function decode(opCODE){
                             screenPixel[x+j][y+h] = 1
                         }
                     }
-                    if(x+j > 63){
-                        break
-                    }
-                }
-                if(y+h > 31){
-                    break
                 }
             }
             
@@ -413,7 +407,7 @@ function drawPixel(xd, yd, c){
     ctx.closePath();    
 }
 
-writeFonts(0x50)
+writeFonts(0x0)
 
 //loadPG()
 
