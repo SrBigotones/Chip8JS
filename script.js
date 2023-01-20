@@ -3,7 +3,7 @@ var vRAM = new Array(4096)
 var vVX = new Array(16).fill(0) //V0 to VF general registers
 var vI = vTIMER = vSOUND = 0
 var bfrCell = ["tblRAM0","tblRAM0"] //the last cells that were edited
-
+var instructionPerDraw = 10
 var pixels = new Array(2048).fill(0)
 var screenPixel = []
 const altShift = 0 //alternative shift operator, 0 = original, VX = VY and then shift // 1 = 90', VX shifts
@@ -15,6 +15,7 @@ var keys = new Array(16).fill(false)
 const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
 var vPC = startRAM
+var actualFrame
 const vFONTS = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -69,13 +70,6 @@ function writeDivOP(opCODE){
 }
 
 function decode(opCODE){
-
-    if(vTIMER != 0){
-        vTIMER--
-    }
-    if(vSOUND != 0){
-        vSOUND--
-    }
 
     let nibble = [(opCODE & 0x0F00) >> 8,(opCODE & 0x00F0) >> 4,(opCODE & 0x000F)]
     console.log(`opCODE: ${opCODE.toString(16)}`)
@@ -331,11 +325,11 @@ function decode(opCODE){
                     if ((pixelLine & (0x80 >> j)) != 0){
                         if(screenPixel[x+j][y+h] == 1){
                         // if(oX[x+j] == 1 & oY[y+h] == 1){
-                            drawPixel(x+j, y+h, 0)
+                            // drawPixel(x+j, y+h, 0)
                             screenPixel[x + j][y + h] = 0
                             vVX[0xf] = 1
                         }else{
-                            drawPixel(x+j, y+h, 1)
+                            // drawPixel(x+j, y+h, 1)
                             screenPixel[x+j][y+h] = 1
                         }
                     }
@@ -397,23 +391,23 @@ function openfile() {
 		}
 	}
 }
-
+function render(){
+    for (let x = 0; x < 64; x++) {
+        for (let y = 0; y < 32; y++) {
+            drawPixel(x,y,screenPixel[x][y])
+        }
+    }
+}
 function drawPixel(xd, yd, c){
-	console.log(`draw ${xd} ${yd} ${screenPixel[xd][yd]}`)
+	// console.log(`draw ${xd} ${yd} ${screenPixel[xd][yd]}`)
     ctx.beginPath();
     ctx.rect(xd*10, yd*10, 10, 10);
     if(c == 1){
         //draw
         ctx.fillStyle = `white`;//`rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
-        // screenPixel[x][y] = 1
-        // oX[x] = 1
-        // oY[y] = 1
     }else{
         //clean per se
         ctx.fillStyle = `black`;//`rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
-        // screenPixel[x][y] = 0
-        // oX[x] = 0 
-        // oY[y] = 0
     }
     ctx.fill();
     ctx.closePath();    
@@ -427,26 +421,42 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function runOne(){
+function runOne(){
     //console.log(`I: ${runI}`)
-    try {
-        setTableInfo()
+    // try {
+    //     setTableInfo()
         
-    } catch (error) {
+    // } catch (error) {
         
+    // }
+    // await sleep(cpuWait)
+
+    if (vTIMER != 0) {
+        vTIMER--
     }
-    await sleep(cpuWait)
-    getOP = fetch()
-    // decode(getOP)
-    if(getOP){
-        //console.log(opTable.rows[runI])
-        decode(getOP)
-    }else{
-        return
+    if (vSOUND != 0) {
+        vSOUND--
+    }
+
+    for (let step = 0; step < instructionPerDraw; step++) {
+        getOP = fetch()
+        // decode(getOP)
+        if(getOP){
+            //console.log(opTable.rows[runI])
+            decode(getOP)
+        }else{
+            return
+        }
+        
     }
     
     //console.log(`instruction: ${runI}`)
     runI += 1
+    render()
+    actualFrame = requestAnimationFrame(runOne);
+    // setTimeout(() => {
+        
+    // }, 1);
 
 }
 
@@ -454,26 +464,32 @@ async function runOne(){
 
 
 
-async function startME(){
+function startME(){
     console.log("################START##############")
     console.log(vRAM[0x229])
     console.log("################START##############")
-    while((vPC < pgSize + 512) & (stopNOW == false)){
-        try {
-            setTableInfo()
+    instructionPerDraw = 10
+    requestAnimationFrame(runOne)
+    // while((vPC < pgSize + 512) & (stopNOW == false)){
+    //     actualFrame = Date.now()
+    
+    //     console.log(actualFrame)
+        
+    // //     // try {
+    // //     //     setTableInfo()
             
-        } catch (error) {
-        }
-        await sleep(cpuWait)
-        getOP = fetch()
-        //decode(getOP)
-        if(getOP){
-            //console.log(opTable.rows[i])
-            decode(getOP)
-        }else{
-            break
-        }
-    }
+    // //     // } catch (error) {
+    // //     // }
+    // //     // await sleep(cpuWait)
+    // //     // getOP = fetch()
+    // //     // //decode(getOP)
+    // //     // if(getOP){
+    // //     //     //console.log(opTable.rows[i])
+    // //     //     decode(getOP)
+    // //     // }else{
+    // //     //     break
+    // //     // }
+    // }
 
 }
 
