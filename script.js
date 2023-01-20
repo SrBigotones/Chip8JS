@@ -453,7 +453,9 @@ function runOne(){
     //console.log(`instruction: ${runI}`)
     runI += 1
     render()
-    actualFrame = requestAnimationFrame(runOne);
+    if (stopNOW == false){
+        actualFrame = requestAnimationFrame(runOne);
+    }
     // setTimeout(() => {
         
     // }, 1);
