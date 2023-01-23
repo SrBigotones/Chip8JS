@@ -344,6 +344,7 @@
             const selectedFile = e.target.files[0]
             audioContext = new AudioContext()
             openfile();
+            e.target.blur()
         })
 
         btnRUN.addEventListener("click", (e)=>{
@@ -354,6 +355,7 @@
                 stopNOW = false
                 startME()
             }
+            e.target.blur()
         })
         btnStep.addEventListener("click", (e) => {
                 if (!inputElement.files[0]) {
@@ -363,10 +365,12 @@
                     stopNOW=true
                     runOne()
                 }
+                e.target.blur()
             })
 
         btnStop.addEventListener("click", (e) => {
                 stopNOW = true
+                e.target.blur()
             })
 
     </script>

@@ -153,16 +153,15 @@ function decode(opCODE){
         
         case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
             //vVX[0xf] = 0
-
+            var auxAdd = vVX[nibble[1]] + vVX[nibble[0]]
             
-            vVX[nibble[0]] = (vVX[nibble[0]] + vVX[nibble[1]]) & 0xff
-
             //if (vVX[nibble[0]] > 0xff){ //Check if overflow
-            if(vVX[nibble[1]] + vVX[nibble[0] > 0xff]){
-                vVX[nibble[0]] = vVX[nibble[0]] & 0xFF
+            if (auxAdd > 0xff){
+                //vVX[nibble[0]] = vVX[nibble[0]] & 0xFF
                 vVX[0xf] = 1
             }else{vVX[0xf] = 0}
             
+            vVX[nibble[0]] = (vVX[nibble[0]] + vVX[nibble[1]]) & 0xff
 
             break
 
@@ -738,6 +737,114 @@ function setEvents(){
         console.log("RELEASE F")
     })
 
+    document.addEventListener("keydown", (e)=>{
+        var name = e.key
+        var code = e.code
+        switch (code) {
+            case "Digit1":
+                keys[1] = true
+                break;
+            case "Digit2":
+                keys[2] = true
+                break;
+            case "Digit3":
+                keys[3] = true
+                break;
+            case "Digit4":
+                keys[0xc] = true
+                break;
+            case "KeyQ":
+                keys[4] = true
+                break;
+            case "KeyW":
+                keys[5] = true
+                break;
+            case "KeyE":
+                keys[6] = true
+                break;
+            case "KeyR":
+                keys[0xd] = true
+                break;
+            case "KeyA":
+                keys[7] = true
+                break;
+            case "KeyS":
+                keys[8] = true
+                break;
+            case "KeyD":
+                keys[9] = true
+                break;
+            case "KeyF":
+                keys[0xe] = true
+                break;
+            case "KeyZ":
+                keys[0xa] = true
+                break;
+            case "KeyX":
+                keys[0x0] = true
+                break;
+            case "KeyC":
+                keys[0xb] = true
+                break;
+            case "KeyV":
+                keys[0xf] = true
+                break;
+        }
+    })
+    document.addEventListener("keyup", (e) => {
+        var name = e.key
+        var code = e.code
+        switch (code) {
+            case "Digit1":
+                keys[1] = false
+                break;
+            case "Digit2":
+                keys[2] = false
+                break;
+            case "Digit3":
+                keys[3] = false
+                break;
+            case "Digit4":
+                keys[0xc] = false
+                break;
+            case "KeyQ":
+                keys[4] = false
+                break;
+            case "KeyW":
+                keys[5] = false
+                break;
+            case "KeyE":
+                keys[6] = false
+                break;
+            case "KeyR":
+                keys[0xd] = false
+                break;
+            case "KeyA":
+                keys[7] = false
+                break;
+            case "KeyS":
+                keys[8] = false
+                break;
+            case "KeyD":
+                keys[9] = false
+                break;
+            case "KeyF":
+                keys[0xe] = false
+                break;
+            case "KeyZ":
+                keys[0xa] = false
+                break;
+            case "KeyX":
+                keys[0x0] = false
+                break;
+            case "KeyC":
+                keys[0xb] = false
+                break;
+            case "KeyV":
+                keys[0xf] = false
+                break;
+        }
+    })
 
     
 }

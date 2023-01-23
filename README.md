@@ -4,8 +4,8 @@ Currently missing fisical keyboard integration.
 
 # Build
 You can just load the index.html in your browser or...  
-host it locally with node:
-```bash
+host it locally with node and express:
+```
     node index.js
 ```
 And open your browser to address localhost:1090
