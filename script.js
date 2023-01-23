@@ -1,7 +1,8 @@
 
-var vRAM = new Array(4096)
-var vVX = new Array(16).fill(0) //V0 to VF general registers
-var vI = vTIMER = vSOUND = 0
+var vRAM = new Array(4096).fill(0)
+var vVX = new Uint8Array(16)//.fill(0) //V0 to VF general registers
+var vI = new Uint16Array(1) 
+var vTIMER = vSOUND = 0
 var bfrCell = ["tblRAM0","tblRAM0"] //the last cells that were edited
 var instructionPerDraw = 10
 var pixels = new Array(2048).fill(0)
@@ -130,89 +131,94 @@ function decode(opCODE){
             break
         
         case (opCODE & 0xF00F) == 0x8001: //8XY1 OR
-            vVX[0xf] = 0
+            //vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] | vVX[nibble[1]]
             break
         
         case (opCODE & 0xF00F) == 0x8002: //8XY2 AND
-            vVX[0xf] = 0
+            //vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] & vVX[nibble[1]]
             break
         
         case (opCODE & 0xF00F) == 0x8003: //8XY3 XOR
-            vVX[0xf] = 0
+           // vVX[0xf] = 0
             vVX[nibble[0]] = vVX[nibble[0]] ^ vVX[nibble[1]]
             vVX[nibble[0]] = vVX[nibble[0]] & 0xff //caution overflow
             break
         
         case (opCODE & 0xF00F) == 0x8004: //8XY4 ADD
-            vVX[0xf] = 0
-            vVX[nibble[0]] = vVX[nibble[0]] + vVX[nibble[1]]
+            //vVX[0xf] = 0
+
             
-            if (vVX[nibble[0]] > 0xff){ //Check if overflow
+            vVX[nibble[0]] = (vVX[nibble[0]] + vVX[nibble[1]]) & 0xff
+
+            //if (vVX[nibble[0]] > 0xff){ //Check if overflow
+            if(vVX[nibble[1]] + vVX[nibble[0] > 0xff]){
                 vVX[nibble[0]] = vVX[nibble[0]] & 0xFF
                 vVX[0xf] = 1
-            }
+            }else{vVX[0xf] = 0}
+            
 
             break
 
         case (opCODE & 0xF00F) == 0x8005: // 8XY5 Substract
             // vVX[0xf] = 0
-            
-            vVX[nibble[0]] = vVX[nibble[0]] - vVX[nibble[1]] 
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
-
             if(vVX[nibble[0]] > vVX[nibble[1]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
+            
+            vVX[nibble[0]] = vVX[nibble[0]] - vVX[nibble[1]] 
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+
             break
 
         case (opCODE & 0xF00F) == 0x8007: // 8XY7 Substract
             // vVX[0xf] = 0
-            vVX[nibble[0]] = vVX[nibble[1]] - vVX[nibble[0]]
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
-            
             if(vVX[nibble[1]] > vVX[nibble[0]]){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
+            vVX[nibble[0]] = vVX[nibble[1]] - vVX[nibble[0]]
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            
             break
 
         case (opCODE & 0xF00F) == 0x8006: //8XY6 SHIFT RIGHT
             // vVX[0xf] = 0
-            if(altShift == 0){
+            if(altShift == 1){
                 vVX[nibble[0]] = vVX[nibble[1]]
             }
+
             var aux = vVX[nibble[0]] & 0x01
-            
-            vVX[nibble[0]] = vVX[nibble[0]] >> 1
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
-            
             if(aux == 1){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
+            
+            vVX[nibble[0]] = vVX[nibble[0]] >> 1
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+            
             break
         case (opCODE & 0xF00F) == 0x800E: //8XYE SHIFT LEFT
             // vVX[0xf] = 0
         
-            if(altShift == 0){
+            if(altShift == 1){
                 vVX[nibble[0]] = vVX[nibble[1]]
             }
             var aux = vVX[nibble[0]] & 0x80
-
-            vVX[nibble[0]] = vVX[nibble[0]] << 1
-            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
-
             if(aux == 0x80){
                 vVX[0xf] = 1
             }else{
                 vVX[0xf] = 0
             }
+
+            vVX[nibble[0]] = vVX[nibble[0]] << 1
+            vVX[nibble[0]] = vVX[nibble[0]] & 0xff
+
             break
         
         case (opCODE & 0xF000) == 0x9000://9XY0 SKIP
@@ -222,7 +228,7 @@ function decode(opCODE){
             break;
 
         case (opCODE & 0xF000) == 0xA000://ANNN set index register I
-            vI = opCODE & 0xFFF
+            vI[0] = opCODE & 0xFFF
             break;
         
         case (opCODE & 0xF000) == 0xB000://BNNN Jump with offset
@@ -261,7 +267,7 @@ function decode(opCODE){
             break
 
         case (opCODE & 0xF0FF) == 0xF01E:// FX1E Add to index
-            vI += vVX[nibble[0]]
+            vI[0] += vVX[nibble[0]]
             break
 
         case (opCODE & 0xF0FF) == 0xF00A:// FX0A Get key
@@ -276,36 +282,38 @@ function decode(opCODE){
         
         case (opCODE & 0xF0FF) == 0xF029:// FX29 Font Character
             //Fonts stored in 0x50, 5 bytes per character
-            vI = (5 * vVX[nibble[0]])
+            vI[0] = (5 * vVX[nibble[0]])
+            //stopNOW = true
+            //console.log(`READ FONT: ${vRAM[vI[0]]} ${(5 * vVX[nibble[0]])} ${vI[0]}`)
             break
         
         case (opCODE & 0xF0FF) == 0xF033:// FX33 Binary-coded decimal conversion
             var foo = vVX[nibble[0]]
             // stopNOW = true
-            vRAM[vI] = parseInt(foo/100)
-            vRAM[vI+1] = parseInt((foo%100)/10)
-            vRAM[vI+2] = parseInt((foo%10))
+            vRAM[vI[0]] = parseInt(foo/100)
+            vRAM[vI[0]+1] = parseInt((foo%100)/10)
+            vRAM[vI[0]+2] = parseInt((foo%10))
             //need to update those cells
-            document.getElementById(`tblRAM${vI - 512}`).innerHTML = ("0" + vRAM[vI].toString(16).toUpperCase())
-            document.getElementById(`tblRAM${vI - 511}`).innerHTML = ("0" + vRAM[vI+1].toString(16).toUpperCase())
-            document.getElementById(`tblRAM${vI - 510}`).innerHTML = ("0" + vRAM[vI+2].toString(16).toUpperCase())
+            document.getElementById(`tblRAM${vI[0] - 512}`).innerHTML = ("0" + vRAM[vI[0]].toString(16).toUpperCase())
+            document.getElementById(`tblRAM${vI[0] - 511}`).innerHTML = ("0" + vRAM[vI[0]+1].toString(16).toUpperCase())
+            document.getElementById(`tblRAM${vI[0] - 510}`).innerHTML = ("0" + vRAM[vI[0]+2].toString(16).toUpperCase())
             
-            vI += 2
+            // vI += 2
             break
         
         case (opCODE & 0xF0FF) == 0xF055:// FX55 Store Memory
             var auxi 
             for (let i = 0; i <= nibble[0]; i++) {
-                vRAM[vI + i] = vVX[i]
+                vRAM[vI[0] + i] = vVX[i]
                 auxi = vVX[i].toString(16)
                 if (auxi <= 0xf) { auxi = "0" + auxi }
-                document.getElementById(`tblRAM${vI+i - 512}`).innerHTML = auxi.toUpperCase()
+                document.getElementById(`tblRAM${vI[0]+i - 512}`).innerHTML = auxi.toUpperCase()
             }
-            vI += 2
+            //vI += 2
             break
         case (opCODE & 0xF0FF) == 0xF065:// FX65 Load Memory
             for (let i = 0; i <= nibble[0]; i++) {
-                vVX[i] = vRAM[vI + i]
+                vVX[i] = vRAM[vI[0] + i]
             }
             break
 
@@ -317,21 +325,18 @@ function decode(opCODE){
             vVX[0xF] = 0 //VF 
 
             for (let h = 0; h < nibble[2]; h++) {
-                pixelLine = vRAM[vI + h]
+                pixelLine = vRAM[vI[0] + h]
 				
                 for (let j = 0; j < 8; j++) {
-                    if((x+j > 63) | (y+h > 31)){break}
+                    //if((x+j > 63) | (y+h > 31)){break}
                     
                     if ((pixelLine & (0x80 >> j)) != 0){
                         if(screenPixel[x+j][y+h] == 1){
                         // if(oX[x+j] == 1 & oY[y+h] == 1){
                             // drawPixel(x+j, y+h, 0)
-                            screenPixel[x + j][y + h] = 0
                             vVX[0xf] = 1
-                        }else{
-                            // drawPixel(x+j, y+h, 1)
-                            screenPixel[x+j][y+h] = 1
                         }
+                        screenPixel[x + j][y + h] ^= 1
                     }
                 }
             }
@@ -346,17 +351,16 @@ function decode(opCODE){
 
 
 function openfile() {
-    vRAM = new Array(4096)
-    VX = new Array(16).fill(0) //V0 to VF general registers
-    vI = vTIMER = vSOUND = 0
-    oX = new Array(64).fill(0)
-    oY = new Array(32).fill(0)
+    vRAM = new Array(4096).fill(0)
+    VX = new Uint8Array(16) //V0 to VF general registers
+    vI[0] = vTIMER = vSOUND = 0
     runI = getOP = 0
     vSTACK = new Array()
     pgSize = 0
     vPC = startRAM
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     cleanPixels()
+    writeFonts(0x0)
 
 	var input = document.getElementById("inputROM").files;
 	var fileData = new Blob([input[0]]);
@@ -385,6 +389,20 @@ function openfile() {
 		}
 	}
 }
+
+function cleanPixels(){
+    screenPixel = []
+    for (let i = 0; i < 64; i++) {
+        let aux = []
+        for (let h = 0; h < 32; h++) {
+            aux.push(0)
+        }
+        screenPixel.push(aux)
+
+    }
+}
+
+
 function render(){
     for (let x = 0; x < 64; x++) {
         for (let y = 0; y < 32; y++) {
@@ -458,8 +476,6 @@ function runOne(){
 
 
 
-
-
 function startME(){
     console.log("################START##############")
     console.log(vRAM[0x229])
@@ -489,18 +505,6 @@ function startME(){
 
 }
 
-
-function cleanPixels(){
-    screenPixel = []
-    for (let i = 0; i < 64; i++) {
-        let aux = []
-        for (let h = 0; h < 32; h++) {
-            aux.push(0)
-        }
-        screenPixel.push(aux)
-
-    }
-}
 
 
 function writeRAMtbl(progLen){
