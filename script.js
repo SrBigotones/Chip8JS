@@ -410,6 +410,7 @@ function render(){
         }
     }
 }
+
 function drawPixel(xd, yd, c){
 	// console.log(`draw ${xd} ${yd} ${screenPixel[xd][yd]}`)
     ctx.beginPath();
@@ -435,12 +436,7 @@ function sleep(ms) {
 
 function runOne(){
     //console.log(`I: ${runI}`)
-    // try {
-    //     setTableInfo()
-        
-    // } catch (error) {
-        
-    // }
+    
     // await sleep(cpuWait)
 
     if (vTIMER != 0) {
@@ -458,6 +454,13 @@ function runOne(){
             decode(getOP)
         }else{
             return
+        }
+
+        try {
+            setTableInfo()
+            
+        } catch (error) {
+            
         }
         
     }
