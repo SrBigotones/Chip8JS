@@ -1,5 +1,5 @@
 # Description
-Chip8 Interpreter writen in vanilla JS
+Chip8 Interpreter writen in vanilla JS.
 Currently missing fisical keyboard integration.
 
 # Build
