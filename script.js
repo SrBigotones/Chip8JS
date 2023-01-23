@@ -17,6 +17,11 @@ const opTable = document.getElementById("opTable")
 const startRAM = 512 //Where I start to write to RAM
 var vPC = startRAM
 var actualFrame
+var playSound = false
+
+var osc, gainOsc
+
+
 const vFONTS = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -352,6 +357,19 @@ function decode(opCODE){
 
 function openfile() {
     vRAM = new Array(4096).fill(0)
+
+    osc = audioContext.createOscillator()
+    gainOsc = audioContext.createGain()
+    osc.type = "sine"
+    osc.connect(gainOsc)
+    osc.start()
+    gainOsc.connect(audioContext.destination)
+    //gainOsc.gain.
+    gainOsc.gain.exponentialRampToValueAtTime(
+        0.0001, audioContext.currentTime 
+    )
+    //osc.connect(audioContext.destination)
+
     VX = new Uint8Array(16) //V0 to VF general registers
     vI[0] = vTIMER = vSOUND = 0
     runI = getOP = 0
@@ -440,10 +458,26 @@ function runOne(){
     // await sleep(cpuWait)
 
     if (vTIMER != 0) {
+
         vTIMER--
     }
     if (vSOUND != 0) {
+        if(playSound == false) {
+            //gainOsc.connect(audioContext.destination)
+            gainOsc.gain.exponentialRampToValueAtTime(
+                .12, audioContext.currentTime + 0.04
+            )
+            playSound = true
+        }
         vSOUND--
+    }else{
+        if(playSound == true){
+            gainOsc.gain.exponentialRampToValueAtTime(
+                0.00001, audioContext.currentTime + 0.1
+            )
+            //gainOsc.disconnect(audioContext.destination)
+            playSound = false
+        } 
     }
 
     for (let step = 0; step < instructionPerDraw; step++) {

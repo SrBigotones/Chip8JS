@@ -339,9 +339,10 @@
         const btnStop = document.getElementById("btnStop")
         
         inputElement.files[0]
-
+        var audioContext
         inputElement.addEventListener("change", (e) => {
             const selectedFile = e.target.files[0]
+            audioContext = new AudioContext()
             openfile();
         })
 
