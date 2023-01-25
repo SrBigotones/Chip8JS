@@ -332,7 +332,7 @@ function decode(opCODE){
                 pixelLine = vRAM[vI[0] + h]
 				
                 for (let j = 0; j < 8; j++) {
-                    //if((x+j > 63) | (y+h > 31)){break}
+                    if((x+j > 63) | (y+h > 31)){break}
                     
                     if ((pixelLine & (0x80 >> j)) != 0){
                         if(screenPixel[x+j][y+h] == 1){
