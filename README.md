@@ -1,6 +1,6 @@
 # Description
 Chip8 Interpreter writen in vanilla JS.  
-Currently missing fisical keyboard integration.
+~~Currently missing fisical keyboard integration.~~
 
 # Build
 You can just load the index.html in your browser or...  

@@ -337,14 +337,31 @@
         const btnRUN = document.getElementById("btnRUN")
         const btnStep = document.getElementById("btnStep")
         const btnStop = document.getElementById("btnStop")
-        
+        var osc, gainOsc
+
+    
         inputElement.files[0]
         var audioContext
         inputElement.addEventListener("change", (e) => {
             const selectedFile = e.target.files[0]
-            audioContext = new AudioContext()
             openfile();
             e.target.blur()
+            
+        })
+        
+        inputElement.addEventListener("click", (e)=>{
+            
+            audioContext = new AudioContext()
+            osc = audioContext.createOscillator()
+            gainOsc = audioContext.createGain()
+            osc.type = "sine"
+            osc.connect(gainOsc)
+            osc.start()
+            gainOsc.connect(audioContext.destination)
+            //gainOsc.gain.
+            gainOsc.gain.exponentialRampToValueAtTime(
+                0.0001, audioContext.currentTime
+            )
         })
 
         btnRUN.addEventListener("click", (e)=>{
@@ -376,6 +393,7 @@
     </script>
     <script src="./script.js"></script>
     <script>
+        
         setEvents()
         writeRAMtbl(200)
     </script>

@@ -19,7 +19,7 @@ var vPC = startRAM
 var actualFrame
 var playSound = false
 
-var osc, gainOsc
+
 
 
 const vFONTS = [
@@ -357,16 +357,16 @@ function decode(opCODE){
 function openfile() {
     vRAM = new Array(4096).fill(0)
 
-    osc = audioContext.createOscillator()
-    gainOsc = audioContext.createGain()
-    osc.type = "sine"
-    osc.connect(gainOsc)
-    osc.start()
-    gainOsc.connect(audioContext.destination)
-    //gainOsc.gain.
-    gainOsc.gain.exponentialRampToValueAtTime(
-        0.0001, audioContext.currentTime 
-    )
+    // osc = audioContext.createOscillator()
+    // gainOsc = audioContext.createGain()
+    // osc.type = "sine"
+    // osc.connect(gainOsc)
+    // osc.start()
+    // gainOsc.connect(audioContext.destination)
+    // //gainOsc.gain.
+    // gainOsc.gain.exponentialRampToValueAtTime(
+    //     0.0001, audioContext.currentTime 
+    // )
     //osc.connect(audioContext.destination)
 
     VX = new Uint8Array(16) //V0 to VF general registers
