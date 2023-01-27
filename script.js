@@ -601,269 +601,219 @@ function setEvents(){
     const kbE = document.getElementById("kbE")
     const kbF = document.getElementById("kbF")
 
-    //TOUCH EVENTS
-    kb0.addEventListener("touchstart", (e) => {
-        keys[0] = true
-    })
-    
-    kb0.addEventListener("touchend", (e) => {
+    var kb0OUT = ()=>{
         keys[0] = false
-    })
-
-    kb1.addEventListener("touchstart", (e) => {
-        keys[1] = true
-    })
-
-    kb1.addEventListener("touchend", (e) => {
+        console.log("IM OUT")
+    }
+    var kb1OUT = () => {
         keys[1] = false
-    })
-
-    kb2.addEventListener("touchstart", (e) => {
-        keys[2] = true
-    })
-
-    kb2.addEventListener("touchend", (e) => {
+    }
+    var kb2OUT = () => {
         keys[2] = false
-    })
-
-    kb3.addEventListener("touchstart", (e) => {
-        keys[3] = true
-    })
-
-    kb3.addEventListener("touchend", (e) => {
+    }
+    var kb3OUT = () => {
         keys[3] = false
-    })
-
-    kb4.addEventListener("touchstart", (e) => {
-        keys[4] = true
-    })
-
-    kb4.addEventListener("touchend", (e) => {
+    }
+    var kb4OUT = () => {
         keys[4] = false
-    })
-
-    kb5.addEventListener("touchstart", (e) => {
-        keys[5] = true
-    })
-
-    kb5.addEventListener("touchend", (e) => {
+    }
+    var kb5OUT = () => {
         keys[5] = false
-    })
-
-    kb6.addEventListener("touchstart", (e) => {
-        keys[6] = true
-    })
-
-    kb6.addEventListener("touchend", (e) => {
+    }
+    var kb6OUT = () => {
         keys[6] = false
-    })
-
-    kb7.addEventListener("touchstart", (e) => {
-        keys[7] = true
-    })
-
-    kb7.addEventListener("touchend", (e) => {
+    }
+    var kb7OUT = () => {
         keys[7] = false
-    })
-
-    kb8.addEventListener("touchstart", (e) => {
-        keys[8] = true
-    })
-
-    kb8.addEventListener("touchend", (e) => {
+    }
+    var kb8OUT = () => {
         keys[8] = false
-    })
-
-    kb9.addEventListener("touchstart", (e) => {
-        keys[9] = true
-    })
-
-    kb9.addEventListener("touchend", (e) => {
+    }
+    var kb9OUT = () => {
         keys[9] = false
-    })
-
-    kbA.addEventListener("touchstart", (e) => {
-        keys[10] = true
-    })
-
-    kbA.addEventListener("touchend", (e) => {
+    }
+    var kbAOUT = () => {
         keys[10] = false
-    })
-
-    kbB.addEventListener("touchstart", (e) => {
-        keys[11] = true
-    })
-
-    kbB.addEventListener("touchend", (e) => {
+    }
+    var kbBOUT = () => {
         keys[11] = false
-    })
-
-    kbC.addEventListener("touchstart", (e) => {
-        keys[12] = true
-    })
-
-    kbC.addEventListener("touchend", (e) => {
+    }
+    var kbCOUT = () => {
         keys[12] = false
-    })
-
-    kbD.addEventListener("touchstart", (e) => {
-        keys[13] = true
-    })
-
-    kbD.addEventListener("touchend", (e) => {
+    }
+    var kbDOUT = () => {
         keys[13] = false
-    })
-
-    kbE.addEventListener("touchstart", (e) => {
-        keys[14] = true
-    })
-
-    kbE.addEventListener("touchend", (e) => {
+    }
+    var kbEOUT = () => {
         keys[14] = false
-    })
-
-    kbF.addEventListener("touchstart", (e) => {
-        keys[15] = true
-    })
-
-    kbF.addEventListener("touchend", (e) => {
+    }
+    var kbFOUT = () => {
         keys[15] = false
-    })
-    //END TOUCH EVENTS
+    }
 
-    kb0.addEventListener("mousedown", (e) => {
+    var kb0IN = () => {
         keys[0] = true
-        console.log("PRESS 0")
-    })
-
-    kb1.addEventListener("mousedown", (e) => {
+        console.log("IM IN")
+    }
+    var kb1IN = () => {
         keys[1] = true
-        console.log("PRESS 1")
-    })
-    kb2.addEventListener("mousedown", (e) => {
+    }
+    var kb2IN = () => {
         keys[2] = true
-        console.log("PRESS 2")
-    })
-    kb3.addEventListener("mousedown", (e) => {
+    }
+    var kb3IN = () => {
         keys[3] = true
-        console.log("PRESS 3")
-    })
-    kb4.addEventListener("mousedown", (e) => {
+    }
+    var kb4IN = () => {
         keys[4] = true
-        console.log("PRESS 4")
-    })
-    kb5.addEventListener("mousedown", (e) => {
+    }
+    var kb5IN = () => {
         keys[5] = true
-        console.log("PRESS 5")
-    })
-    kb6.addEventListener("mousedown", (e) => {
+    }
+    var kb6IN = () => {
         keys[6] = true
-        console.log("PRESS 6")
-    })
-    kb7.addEventListener("mousedown", (e) => {
+    }
+    var kb7IN = () => {
         keys[7] = true
-        console.log("PRESS 7")
-    })
-    kb8.addEventListener("mousedown", (e) => {
+    }
+    var kb8IN = () => {
         keys[8] = true
-        console.log("PRESS 8")
-    })
-    kb9.addEventListener("mousedown", (e) => {
+    }
+    var kb9IN = () => {
         keys[9] = true
-        console.log("PRESS 9")
-    })
-    kbA.addEventListener("mousedown", (e) => {
-        keys[0xa] = true
-        console.log("PRESS A")
-    })
-    kbB.addEventListener("mousedown", (e) => {
-        keys[0xb] = true
-        console.log("PRESS B")
-    })
-    kbC.addEventListener("mousedown", (e) => {
-        keys[0xc] = true
-        console.log("PRESS C")
-    })
-    kbD.addEventListener("mousedown", (e) => {
-        keys[0xd] = true
-        console.log("PRESS D")
-    })
-    kbE.addEventListener("mousedown", (e) => {
-        keys[0xe] = true
-        console.log("PRESS E")
-    })
-    kbF.addEventListener("mousedown", (e) => {
-        keys[0xf] = true
-        console.log("PRESS F")
-    })
+    }
+    var kbAIN = () => {
+        keys[10] = true
+    }
+    var kbBIN = () => {
+        keys[11] = true
+    }
+    var kbCIN = () => {
+        keys[12] = true
+    }
+    var kbDIN = () => {
+        keys[13] = true
+    }
+    var kbEIN = () => {
+        keys[14] = true
+    }
+    var kbFIN = () => {
+        keys[15] = true
+    }
+
+    kb0.addEventListener("mousedown",kb0IN,false)
+    kb0.addEventListener("touchstart",kb0IN, false)
+
+    kb1.addEventListener("mousedown", kb1IN, false)
+    kb1.addEventListener("touchstart", kb1IN, false)
+    
+    kb2.addEventListener("mousedown", kb2IN, false)
+    kb2.addEventListener("touchstart", kb2IN, false)
+    
+    kb3.addEventListener("mousedown", kb3IN, false)
+    kb3.addEventListener("touchstart", kb3IN, false)
+
+    kb4.addEventListener("mousedown", kb4IN, false)
+    kb4.addEventListener("touchstart", kb4IN, false)
+
+    kb5.addEventListener("mousedown", kb5IN, false)
+    kb5.addEventListener("touchstart", kb5IN, false)
+
+    kb6.addEventListener("mousedown", kb6IN, false)
+    kb6.addEventListener("touchstart", kb6IN, false)
+
+    kb7.addEventListener("mousedown", kb7IN, false)
+    kb7.addEventListener("touchstart", kb7IN, false)
+
+    kb8.addEventListener("mousedown", kb8IN, false)
+    kb8.addEventListener("touchstart", kb8IN, false)
+
+    kb9.addEventListener("mousedown", kb9IN, false)
+    kb9.addEventListener("touchstart", kb9IN, false)
+
+    kbA.addEventListener("mousedown", kbAIN, false)
+    kbA.addEventListener("touchstart", kbAIN, false)
+
+    kbB.addEventListener("mousedown", kbBIN, false)
+    kbB.addEventListener("touchstart", kbBIN, false)
+
+    kbC.addEventListener("mousedown", kbCIN, false)
+    kbC.addEventListener("touchstart", kbCIN, false)
+
+    kbD.addEventListener("mousedown", kbDIN, false)
+    kbD.addEventListener("touchstart", kbDIN, false)
+
+    kbE.addEventListener("mousedown", kbEIN, false)
+    kbE.addEventListener("touchstart", kbEIN, false)
+
+    kbF.addEventListener("mousedown", kbFIN, false)
+    kbF.addEventListener("touchstart", kbFIN, false)
 
 
+    kb0.addEventListener("mouseup", kb0OUT, false)
+    kb0.addEventListener("touchend", kb0OUT, false)
+    kb0.addEventListener("mouseleave", kb0OUT, false)
 
-    kb0.addEventListener("mouseup", (e) => {
-        keys[0] = false
-        console.log("RELEASE 0")
-    })
+    kb1.addEventListener("mouseup", kb1OUT, false)
+    kb1.addEventListener("touchend", kb1OUT, false)
+    kb1.addEventListener("mouseleave", kb1OUT, false)
 
-    kb1.addEventListener("mouseup", (e) => {
-        keys[1] = false
-        console.log("RELEASE 1")
-    })
-    kb2.addEventListener("mouseup", (e) => {
-        keys[2] = false
-        console.log("RELEASE 2")
-    })
-    kb3.addEventListener("mouseup", (e) => {
-        keys[3] = false
-        console.log("RELEASE 3")
-    })
-    kb4.addEventListener("mouseup", (e) => {
-        keys[4] = false
-        console.log("RELEASE 4")
-    })
-    kb5.addEventListener("mouseup", (e) => {
-        keys[5] = false
-        console.log("RELEASE 5")
-    })
-    kb6.addEventListener("mouseup", (e) => {
-        keys[6] = false
-        console.log("RELEASE 6")
-    })
-    kb7.addEventListener("mouseup", (e) => {
-        keys[7] = false
-        console.log("RELEASE 7")
-    })
-    kb8.addEventListener("mouseup", (e) => {
-        keys[8] = false
-        console.log("RELEASE 8")
-    })
-    kb9.addEventListener("mouseup", (e) => {
-        keys[9] = false
-        console.log("RELEASE 9")
-    })
-    kbA.addEventListener("mouseup", (e) => {
-        keys[0xa] = false
-        console.log("RELEASE A")
-    })
-    kbB.addEventListener("mouseup", (e) => {
-        keys[0xb] = false
-        console.log("RELEASE B")
-    })
-    kbC.addEventListener("mouseup", (e) => {
-        keys[0xc] = false
-        console.log("RELEASE C")
-    })
-    kbD.addEventListener("mouseup", (e) => {
-        keys[0xd] = false
-        console.log("RELEASE D")
-    })
-    kbE.addEventListener("mouseup", (e) => {
-        keys[0xe] = false
-        console.log("RELEASE E")
-    })
-    kbF.addEventListener("mouseup", (e) => {
-        keys[0xf] = false
-        console.log("RELEASE F")
-    })
+    kb2.addEventListener("mouseup", kb2OUT, false)
+    kb2.addEventListener("touchend", kb2OUT, false)
+    kb2.addEventListener("mouseleave", kb2OUT, false)
+    
+    kb3.addEventListener("mouseup", kb3OUT, false)
+    kb3.addEventListener("touchend", kb3OUT, false)
+    kb3.addEventListener("mouseleave", kb3OUT, false)
+
+    kb4.addEventListener("mouseup", kb4OUT, false)
+    kb4.addEventListener("touchend", kb4OUT, false)
+    kb4.addEventListener("mouseleave", kb4OUT, false)
+
+    kb5.addEventListener("mouseup", kb5OUT, false)
+    kb5.addEventListener("touchend", kb5OUT, false)
+    kb5.addEventListener("mouseleave", kb5OUT, false)
+
+    kb6.addEventListener("mouseup", kb6OUT, false)
+    kb6.addEventListener("touchend", kb6OUT, false)
+    kb6.addEventListener("mouseleave", kb6OUT, false)
+
+    kb7.addEventListener("mouseup", kb7OUT, false)
+    kb7.addEventListener("touchend", kb7OUT, false)
+    kb7.addEventListener("mouseleave", kb7OUT, false)
+
+    kb8.addEventListener("mouseup", kb8OUT, false)
+    kb8.addEventListener("touchend", kb8OUT, false)
+    kb8.addEventListener("mouseleave", kb8OUT, false)
+
+    kb9.addEventListener("mouseup", kb9OUT, false)
+    kb9.addEventListener("touchend", kb9OUT, false)
+    kb9.addEventListener("mouseleave", kb9OUT, false)
+
+    kbA.addEventListener("mouseup", kbAOUT, false)
+    kbA.addEventListener("touchend", kbAOUT, false)
+    kbA.addEventListener("mouseleave", kbAOUT, false)
+
+    kbB.addEventListener("mouseup", kbBOUT, false)
+    kbB.addEventListener("touchend", kbBOUT, false)
+    kbB.addEventListener("mouseleave", kbBOUT, false)
+    
+    kbC.addEventListener("mouseup", kbCOUT, false)
+    kbC.addEventListener("touchend", kbCOUT, false)
+    kbC.addEventListener("mouseleave", kbCOUT, false)
+
+    kbD.addEventListener("mouseup", kbDOUT, false)
+    kbD.addEventListener("touchend", kbDOUT, false)
+    kbD.addEventListener("mouseleave", kbDOUT, false)
+
+    kbE.addEventListener("mouseup", kbEOUT, false)
+    kbE.addEventListener("touchend", kbEOUT, false)
+    kbE.addEventListener("mouseleave", kbEOUT, false)
+    
+    kbF.addEventListener("mouseup", kbFOUT, false)
+    kbF.addEventListener("touchend", kbFOUT, false)
+    kbF.addEventListener("mouseleave", kbFOUT, false)
+
 
     document.addEventListener("keydown", (e)=>{
         var name = e.key
