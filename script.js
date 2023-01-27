@@ -601,7 +601,135 @@ function setEvents(){
     const kbE = document.getElementById("kbE")
     const kbF = document.getElementById("kbF")
 
+    //TOUCH EVENTS
+    kb0.addEventListener("touchstart", (e) => {
+        keys[0] = true
+    })
     
+    kb0.addEventListener("touchend", (e) => {
+        keys[0] = false
+    })
+
+    kb1.addEventListener("touchstart", (e) => {
+        keys[1] = true
+    })
+
+    kb1.addEventListener("touchend", (e) => {
+        keys[1] = false
+    })
+
+    kb2.addEventListener("touchstart", (e) => {
+        keys[2] = true
+    })
+
+    kb2.addEventListener("touchend", (e) => {
+        keys[2] = false
+    })
+
+    kb3.addEventListener("touchstart", (e) => {
+        keys[3] = true
+    })
+
+    kb3.addEventListener("touchend", (e) => {
+        keys[3] = false
+    })
+
+    kb4.addEventListener("touchstart", (e) => {
+        keys[4] = true
+    })
+
+    kb4.addEventListener("touchend", (e) => {
+        keys[4] = false
+    })
+
+    kb5.addEventListener("touchstart", (e) => {
+        keys[5] = true
+    })
+
+    kb5.addEventListener("touchend", (e) => {
+        keys[5] = false
+    })
+
+    kb6.addEventListener("touchstart", (e) => {
+        keys[6] = true
+    })
+
+    kb6.addEventListener("touchend", (e) => {
+        keys[6] = false
+    })
+
+    kb7.addEventListener("touchstart", (e) => {
+        keys[7] = true
+    })
+
+    kb7.addEventListener("touchend", (e) => {
+        keys[7] = false
+    })
+
+    kb8.addEventListener("touchstart", (e) => {
+        keys[8] = true
+    })
+
+    kb8.addEventListener("touchend", (e) => {
+        keys[8] = false
+    })
+
+    kb9.addEventListener("touchstart", (e) => {
+        keys[9] = true
+    })
+
+    kb9.addEventListener("touchend", (e) => {
+        keys[9] = false
+    })
+
+    kbA.addEventListener("touchstart", (e) => {
+        keys[10] = true
+    })
+
+    kbA.addEventListener("touchend", (e) => {
+        keys[10] = false
+    })
+
+    kbB.addEventListener("touchstart", (e) => {
+        keys[11] = true
+    })
+
+    kbB.addEventListener("touchend", (e) => {
+        keys[11] = false
+    })
+
+    kbC.addEventListener("touchstart", (e) => {
+        keys[12] = true
+    })
+
+    kbC.addEventListener("touchend", (e) => {
+        keys[12] = false
+    })
+
+    kbD.addEventListener("touchstart", (e) => {
+        keys[13] = true
+    })
+
+    kbD.addEventListener("touchend", (e) => {
+        keys[13] = false
+    })
+
+    kbE.addEventListener("touchstart", (e) => {
+        keys[14] = true
+    })
+
+    kbE.addEventListener("touchend", (e) => {
+        keys[14] = false
+    })
+
+    kbF.addEventListener("touchstart", (e) => {
+        keys[15] = true
+    })
+
+    kbF.addEventListener("touchend", (e) => {
+        keys[15] = false
+    })
+    //END TOUCH EVENTS
 
     kb0.addEventListener("mousedown", (e) => {
         keys[0] = true
