@@ -1,107 +1,130 @@
 <head>
-    <style>
-        canvas {
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
-        table {
-            display: inline-table;
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet" href="./style.css">
+
 </head>
-<body style="background-color: grey;">
+<body>
     <!--64x32 original size of screen CHIP8, 1 pixel == 10x10 on screen-->
-    <canvas id="myCavas" width="640" height="320" style="background-color: black;"></canvas>
+    <div>
+        <table class="gameTable">
+            <tr style="border: none;">
+                <td>
+                    <canvas class="gameCanvas" id="myCavas" width="640" height="320"></canvas>
+                </td>
+                <td>
+                    <table class="regTable" id="regTable">
+                        <tr>
+                            <th>PC</th>
+                            <th id="tablePC">0000</th>
+                        </tr>
+                        <tr>
+                            <th>I</th>
+                            <th id="tableI">0000</th>
+                        </tr>
+                        <tr>
+                            <th>V0</th>
+                            <th id="tableV0">00</th>
+                        </tr>
+                        <tr>
+                            <th>V1</th>
+                            <th id="tableV1">00</th>
+                        </tr>
+                        <tr>
+                            <th>V2</th>
+                            <th id="tableV2">00</th>
+                        </tr>
+                        <tr>
+                            <th>V3</th>
+                            <th id="tableV3">00</th>
+                        </tr>
+                        <tr>
+                            <th>V4</th>
+                            <th id="tableV4">00</th>
+                        </tr>
+                        <tr>
+                            <th>V5</th>
+                            <th id="tableV5">00</th>
+                        </tr>
+                        <tr>
+                            <th>V6</th>
+                            <th id="tableV6">00</th>
+                        </tr>
+                        <tr>
+                            <th>V7</th>
+                            <th id="tableV7">00</th>
+                        </tr>
+                        <tr>
+                            <th>V8</th>
+                            <th id="tableV8">00</th>
+                        </tr>
+                        <tr>
+                            <th>V9</th>
+                            <th id="tableV9">00</th>
+                        </tr>
+                        <tr>
+                            <th>VA</th>
+                            <th id="tableVA">00</th>
+                        </tr>
+                        <tr>
+                            <th>VB</th>
+                            <th id="tableVB">00</th>
+                        </tr>
+                        <tr>
+                            <th>VC</th>
+                            <th id="tableVC">00</th>
+                        </tr>
+                        <tr>
+                            <th>VD</th>
+                            <th id="tableVD">00</th>
+                        </tr>
+                        <tr>
+                            <th>VE</th>
+                            <th id="tableVE">00</th>
+                        </tr>
+                        <tr>
+                            <th>VF</th>
+                            <th id="tableVF">00</th>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+
     <div>
         <input type="file" id="inputROM"/>
         <input type="button" id="btnRUN" value="RUN"/>
         <input type="button" id="btnStep" value="Step IN" />
         <input type="button" id="btnStop" value="STOP" />
-        <table id="keyboardTable">
-            <tr>
-                <th><input id="kb1" type="button" value="1"></th>
-                <th><input id="kb2" type="button" value="2"></th>
-                <th><input id="kb3" type="button" value="3"></th>
-                <th><input id="kbC" type="button" value="C"></th>
+        <table id="keyboardTable" style="border: none;">
+            <tr class="noBorder">
+                <th><input class = "gameKey" id="kb1" type="button" value="1"></th>
+                <th><input class = "gameKey" id="kb2" type="button" value="2"></th>
+                <th><input class = "gameKey" id="kb3" type="button" value="3"></th>
+                <th><input class = "gameKey" id="kbC" type="button" value="C"></th>
             </tr>
-            <tr>
-                <th><input id="kb4" type="button" value="4"></th>
-                <th><input id="kb5" type="button" value="5"></th>
-                <th><input id="kb6" type="button" value="6"></th>
-                <th><input id="kbD" type="button" value="D"></th>
+            <tr class="noBorder">
+                <th><input class = "gameKey" id="kb4" type="button" value="4"></th>
+                <th><input class = "gameKey" id="kb5" type="button" value="5"></th>
+                <th><input class = "gameKey" id="kb6" type="button" value="6"></th>
+                <th><input class = "gameKey" id="kbD" type="button" value="D"></th>
             </tr>
-            <tr>
-                <th><input id="kb7" type="button" value="7"></th>
-                <th><input id="kb8" type="button" value="8"></th>
-                <th><input id="kb9" type="button" value="9"></th>
-                <th><input id="kbE" type="button" value="E"></th>
+            <tr class="noBorder">
+                <th><input class = "gameKey" id="kb7" type="button" value="7"></th>
+                <th><input class = "gameKey" id="kb8" type="button" value="8"></th>
+                <th><input class = "gameKey" id="kb9" type="button" value="9"></th>
+                <th><input class = "gameKey" id="kbE" type="button" value="E"></th>
             </tr>
-            <tr>
-                <th><input id="kbA" type="button" value="A"></th>
-                <th><input id="kb0" type="button" value="0"></th>
-                <th><input id="kbB" type="button" value="B"></th>
-                <th><input id="kbF" type="button" value="F"></th>
+            <tr class="noBorder">
+                <th><input class = "gameKey" id="kbA" type="button" value="A"></th>
+                <th><input class = "gameKey" id="kb0" type="button" value="0"></th>
+                <th><input class = "gameKey" id="kbB" type="button" value="B"></th>
+                <th><input class = "gameKey" id="kbF" type="button" value="F"></th>
             </tr>
         </table>
         <table id="opTable" style="background-color: white;">
         </table>
-        <table id="regTable" style="background-color: blueviolet;">
-            <tr>
-                <th id="tablePC">PC:</th>
-                <th id="tableI">I:</th>
-            </tr>
-            <tr>
-                <th id="tableV0">V0:</th>
-            </tr>
-            <tr>
-                <th id="tableV1">V1:</th>
-            </tr>
-            <tr>
-                <th id="tableV2">V2:</th>
-            </tr>
-            <tr>
-                <th id="tableV3">V3:</th>
-            </tr>
-            <tr>
-                <th id="tableV4">V4:</th>
-            </tr>
-            <tr>
-                <th id="tableV5">V5:</th>
-            </tr>
-            <tr>
-                <th id="tableV6">V6:</th>
-            </tr>
-            <tr>
-                <th id="tableV7">V7:</th>
-            </tr>
-            <tr>
-                <th id="tableV8">V8:</th>
-            </tr>
-            <tr>
-                <th id="tableV9">V9:</th>
-            </tr>
-            <tr>
-                <th id="tableVA">VA:</th>
-            </tr>
-            <tr>
-                <th id="tableVB">VB:</th>
-            </tr>
-            <tr>
-                <th id="tableVC">VC:</th>
-            </tr>
-            <tr>
-                <th id="tableVD">VD:</th>
-            </tr>
-            <tr>
-                <th id="tableVE">VE:</th>
-            </tr>
-            <tr>
-                <th id="tableVF">VF:</th>
-            </tr>
-            </tr>
-        </table>
-        
         
         
     </div>

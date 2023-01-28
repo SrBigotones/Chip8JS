@@ -562,24 +562,23 @@ function writeRAMtbl(progLen){
 
 
 function setTableInfo(){
-    document.getElementById("tablePC").innerText =`PC: ${vPC.toString(16)}`
-    document.getElementById("tableI").innerText =`I: ${vI.toString(16)}`
-    document.getElementById("tableV0").innerText =`V0: ${vVX[0].toString(16)}`
-    document.getElementById("tableV1").innerText =`V1: ${vVX[1].toString(16)}`
-    document.getElementById("tableV2").innerText =`V2: ${vVX[2].toString(16)}`
-    document.getElementById("tableV3").innerText =`V3: ${vVX[3].toString(16)}`
-    document.getElementById("tableV4").innerText =`V4: ${vVX[4].toString(16)}`
-    document.getElementById("tableV5").innerText =`V5: ${vVX[5].toString(16)}`
-    document.getElementById("tableV6").innerText =`V6: ${vVX[6].toString(16)}`
-    document.getElementById("tableV7").innerText =`V7: ${vVX[7].toString(16)}`
-    document.getElementById("tableV8").innerText =`V8: ${vVX[8].toString(16)}`
-    document.getElementById("tableV9").innerText =`V9: ${vVX[9].toString(16)}`
-    document.getElementById("tableVA").innerText =`VA: ${vVX[10].toString(16)}`
-    document.getElementById("tableVB").innerText =`VB: ${vVX[11].toString(16)}`
-    document.getElementById("tableVC").innerText =`VC: ${vVX[12].toString(16)}`
-    document.getElementById("tableVD").innerText =`VD: ${vVX[13].toString(16)}`
-    document.getElementById("tableVE").innerText =`VE: ${vVX[14].toString(16)}`
-    document.getElementById("tableVF").innerText =`VF: ${vVX[15].toString(16)}`
+    document.getElementById("tablePC").innerText =`${vPC.toString(16)}` 
+    document.getElementById("tableI").innerText =`${vI.toString(16)}`
+    document.getElementById("tableV0").innerText = (vVX[0] > 0xf) ? `${vVX[0].toString(16)}` : `0${vVX[0].toString(16)}`
+    document.getElementById("tableV1").innerText = (vVX[1] > 0xf) ? `${vVX[1].toString(16)}` : `0${vVX[1].toString(16)}`
+    document.getElementById("tableV2").innerText = (vVX[2] > 0xf) ? `${vVX[2].toString(16)}` : `0${vVX[2].toString(16)}`
+    document.getElementById("tableV3").innerText = (vVX[3] > 0xf) ? `${vVX[3].toString(16)}` : `0${vVX[3].toString(16)}`
+    document.getElementById("tableV5").innerText = (vVX[4] > 0xf) ? `${vVX[4].toString(16)}` : `0${vVX[4].toString(16)}`
+    document.getElementById("tableV6").innerText = (vVX[5] > 0xf) ? `${vVX[5].toString(16)}` : `0${vVX[5].toString(16)}`
+    document.getElementById("tableV7").innerText = (vVX[6] > 0xf) ? `${vVX[6].toString(16)}` : `0${vVX[6].toString(16)}`
+    document.getElementById("tableV8").innerText = (vVX[7] > 0xf) ? `${vVX[7].toString(16)}` : `0${vVX[7].toString(16)}`
+    document.getElementById("tableV9").innerText = (vVX[8] > 0xf) ? `${vVX[8].toString(16)}` : `0${vVX[8].toString(16)}`
+    document.getElementById("tableVA").innerText = (vVX[9] > 0xf) ? `${vVX[9].toString(16)}` : `0${vVX[9].toString(16)}`
+    document.getElementById("tableVB").innerText = (vVX[10] > 0xf) ? `${vVX[10].toString(16)}` : `0${vVX[10].toString(16)}`
+    document.getElementById("tableVC").innerText = (vVX[11] > 0xf) ? `${vVX[11].toString(16)}` : `0${vVX[11].toString(16)}`
+    document.getElementById("tableVD").innerText = (vVX[12] > 0xf) ? `${vVX[12].toString(16)}` : `0${vVX[12].toString(16)}`
+    document.getElementById("tableVE").innerText = (vVX[13] > 0xf) ? `${vVX[13].toString(16)}` : `0${vVX[13].toString(16)}`
+    document.getElementById("tableVF").innerText = (vVX[14] > 0xf) ? `${vVX[14].toString(16)}` : `0${vVX[14].toString(16)}`
     
 }
 
@@ -603,7 +602,6 @@ function setEvents(){
 
     var kb0OUT = ()=>{
         keys[0] = false
-        console.log("IM OUT")
     }
     var kb1OUT = () => {
         keys[1] = false
@@ -653,7 +651,6 @@ function setEvents(){
 
     var kb0IN = () => {
         keys[0] = true
-        console.log("IM IN")
     }
     var kb1IN = () => {
         keys[1] = true
